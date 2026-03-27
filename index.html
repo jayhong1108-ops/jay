@@ -490,7 +490,7 @@ function init(){
   loadLocalData();seedInitialData();initFirebase();
   renderDateDisplay();buildTimeSlots();loadDayData();
   updateCurrentTimeIndicator();setInterval(updateCurrentTimeIndicator,60000);
-  loadCalendarEmbed();loadEmailLinks();loadFeeds();loadDaouMail();
+  loadCalendarEmbed();loadEmailLinks();loadFeeds();loadDaouMail();fetchGcalEvents();
   requestNotificationPermission();
   // 30초마다 자동저장 (안전망)
   setInterval(()=>{if(currentView==='day'&&currentPage==='dashboard')saveDayData();},30000);
@@ -591,6 +591,61 @@ function loadDaouMail(){
     addNotification('🏢','다우오피스',`받은메일 ${DAOU_MAILS.length}건`,'https://clify.daouoffice.com/gw/app/mail');
     localStorage.setItem('lastDaouCheck',Date.now().toString());
   }
+}
+
+// ===== GOOGLE CALENDAR API → TIME BLOCK =====
+const GCAL_API_KEY='AIzaSyDY2_dXSoIQb5K6DHf2VsH8JGCRX3zDVCQ';
+const GCAL_IDS=[
+  'jyh230901@gmail.com',
+  '5173c412e4f8f8f24634022ad19958c9f9d3c609478dfb0a5e9c8c9f9c9ae285@group.calendar.google.com',
+  '1d785eb21678c76fc9e4a3ac84e55cc922104e51112acf07651244e5c4c80578@group.calendar.google.com'
+];
+async function fetchGcalEvents(){
+  if(currentView!=='day')return;
+  const d=new Date(currentDate);
+  const timeMin=new Date(d.getFullYear(),d.getMonth(),d.getDate(),0,0,0).toISOString();
+  const timeMax=new Date(d.getFullYear(),d.getMonth(),d.getDate(),23,59,59).toISOString();
+  let allEvents=[];
+  for(const calId of GCAL_IDS){
+    try{
+      const url=`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calId)}/events?key=${GCAL_API_KEY}&timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime&maxResults=50`;
+      const res=await fetch(url);
+      if(!res.ok)continue;
+      const data=await res.json();
+      if(data.items)allEvents.push(...data.items);
+    }catch(e){}
+  }
+  if(!allEvents.length)return;
+  // Sort by start time
+  allEvents.sort((a,b)=>{
+    const aT=new Date(a.start.dateTime||a.start.date);
+    const bT=new Date(b.start.dateTime||b.start.date);
+    return aT-bT;
+  });
+  // Place events into time slots
+  allEvents.forEach(ev=>{
+    if(!ev.start.dateTime)return; // skip all-day events
+    const start=new Date(ev.start.dateTime);
+    const h=start.getHours(),m=start.getMinutes();
+    const slot=m>=30?`${String(h).padStart(2,'0')}:30`:`${String(h).padStart(2,'0')}:00`;
+    const el=document.querySelector(`.time-content[data-time="${slot}"]`);
+    if(el){
+      const endTime=ev.end?.dateTime?new Date(ev.end.dateTime):null;
+      const timeStr=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+      const endStr=endTime?`~${String(endTime.getHours()).padStart(2,'0')}:${String(endTime.getMinutes()).padStart(2,'0')}`:'';
+      const prefix=`📅 `;
+      const existing=el.textContent.trim();
+      const newText=`${prefix}${ev.summary||'(제목없음)'} (${timeStr}${endStr})`;
+      if(existing&&!existing.includes(ev.summary||'')){
+        el.textContent=existing+' / '+newText;
+      }else if(!existing){
+        el.textContent=newText;
+      }
+      el.classList.add('has-content');
+      el.style.color='var(--accent3)';
+    }
+  });
+  debounceSave();
 }
 
 // ===== NEWS FEEDS =====
@@ -711,9 +766,9 @@ function fmtShort(d){return `${d.getMonth()+1}/${d.getDate()}`;}
 function getWeekStart(d){const r=new Date(d);r.setDate(r.getDate()-r.getDay()+1);return r;}
 
 // ===== VIEW SWITCHING =====
-function switchView(v){if(currentView==='day')saveDayData();currentView=v;document.querySelectorAll('.view-toggle button').forEach(b=>b.classList.toggle('active',b.dataset.view===v));document.getElementById('dayView').classList.toggle('hidden',v!=='day');document.getElementById('weekView').classList.toggle('active',v==='week');document.getElementById('monthView').classList.toggle('active',v==='month');renderDateDisplay();if(v==='day')loadDayData();else if(v==='week')renderWeekView();else renderMonthView();}
-function navigate(o){if(currentView==='day'){saveDayData();currentDate=addDays(currentDate,o);}else if(currentView==='week'){currentDate=addDays(currentDate,o*7);}else{currentDate=new Date(currentDate.getFullYear(),currentDate.getMonth()+o,1);}renderDateDisplay();if(currentView==='day')loadDayData();else if(currentView==='week')renderWeekView();else renderMonthView();}
-function goToDate(v){if(currentView==='day')saveDayData();currentDate=parseDate(v);renderDateDisplay();if(currentView!=='day')switchView('day');else loadDayData();}
+function switchView(v){if(currentView==='day')saveDayData();currentView=v;document.querySelectorAll('.view-toggle button').forEach(b=>b.classList.toggle('active',b.dataset.view===v));document.getElementById('dayView').classList.toggle('hidden',v!=='day');document.getElementById('weekView').classList.toggle('active',v==='week');document.getElementById('monthView').classList.toggle('active',v==='month');renderDateDisplay();if(v==='day'){loadDayData();fetchGcalEvents();}else if(v==='week')renderWeekView();else renderMonthView();}
+function navigate(o){if(currentView==='day'){saveDayData();currentDate=addDays(currentDate,o);}else if(currentView==='week'){currentDate=addDays(currentDate,o*7);}else{currentDate=new Date(currentDate.getFullYear(),currentDate.getMonth()+o,1);}renderDateDisplay();if(currentView==='day'){loadDayData();fetchGcalEvents();}else if(currentView==='week')renderWeekView();else renderMonthView();}
+function goToDate(v){if(currentView==='day')saveDayData();currentDate=parseDate(v);renderDateDisplay();if(currentView!=='day')switchView('day');else{loadDayData();fetchGcalEvents();}}
 function goToToday(){if(currentView==='day')saveDayData();currentDate=new Date();renderDateDisplay();if(currentView==='day')loadDayData();else if(currentView==='week')renderWeekView();else renderMonthView();}
 function renderDateDisplay(){const d=currentDate,el=document.getElementById('dateDisplay');document.getElementById('datePicker').value=dateKey();if(currentView==='day'){const c=d.getDay()===0?'var(--danger)':d.getDay()===6?'var(--accent)':'var(--text)';el.innerHTML=`<span style="color:${c}">${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} (${DAYS_KR[d.getDay()]})</span>`;}else if(currentView==='week'){const s=getWeekStart(d),e=addDays(s,6);el.innerHTML=`${fmtShort(s)} ~ ${fmtShort(e)}`;}else{el.innerHTML=`${d.getFullYear()}년 ${d.getMonth()+1}월`;}}
 
