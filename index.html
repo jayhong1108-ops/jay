@@ -594,11 +594,12 @@ function loadDaouMail(){
 }
 
 // ===== GOOGLE CALENDAR API → TIME BLOCK =====
-const GCAL_API_KEY='AIzaSyDY2_dXSoIQb5K6DHf2VsH8JGCRX3zDVCQ';
-const GCAL_IDS=[
-  'jyh230901@gmail.com',
-  '5173c412e4f8f8f24634022ad19958c9f9d3c609478dfb0a5e9c8c9f9c9ae285@group.calendar.google.com',
-  '1d785eb21678c76fc9e4a3ac84e55cc922104e51112acf07651244e5c4c80578@group.calendar.google.com'
+const GCAL_SOURCES=[
+  {id:'jyh230901@gmail.com',key:'AIzaSyDY2_dXSoIQb5K6DHf2VsH8JGCRX3zDVCQ'},
+  {id:'jyh150701@gmail.com',key:'AIzaSyBKIVU4Gc7SxcinWguH-43YObWCIKZu_w0'},
+  {id:'jay.hong1108@gmail.com',key:'AIzaSyBwgF9jPb3r0gZUW5Yeof2lMDtAPiBdQYM'},
+  {id:'5173c412e4f8f8f24634022ad19958c9f9d3c609478dfb0a5e9c8c9f9c9ae285@group.calendar.google.com',key:'AIzaSyDY2_dXSoIQb5K6DHf2VsH8JGCRX3zDVCQ'},
+  {id:'1d785eb21678c76fc9e4a3ac84e55cc922104e51112acf07651244e5c4c80578@group.calendar.google.com',key:'AIzaSyDY2_dXSoIQb5K6DHf2VsH8JGCRX3zDVCQ'}
 ];
 async function fetchGcalEvents(){
   if(currentView!=='day')return;
@@ -606,9 +607,9 @@ async function fetchGcalEvents(){
   const timeMin=new Date(d.getFullYear(),d.getMonth(),d.getDate(),0,0,0).toISOString();
   const timeMax=new Date(d.getFullYear(),d.getMonth(),d.getDate(),23,59,59).toISOString();
   let allEvents=[];
-  for(const calId of GCAL_IDS){
+  for(const src of GCAL_SOURCES){
     try{
-      const url=`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calId)}/events?key=${GCAL_API_KEY}&timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime&maxResults=50`;
+      const url=`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(src.id)}/events?key=${src.key}&timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime&maxResults=50`;
       const res=await fetch(url);
       if(!res.ok)continue;
       const data=await res.json();
