@@ -263,8 +263,7 @@
     <div class="brand">■ Jay's CEO Dashboard</div>
     <div class="top-tabs">
       <button class="top-tab active" data-page="dashboard" onclick="switchPage('dashboard')">Daily Task</button>
-      <button class="top-tab" data-page="daily" onclick="switchPage('daily')">일일업무보고</button>
-      <button class="top-tab" data-page="weekly" onclick="switchPage('weekly')">주간업무보고</button>
+      <button class="top-tab" data-page="mgmt" onclick="switchPage('mgmt')">업무관리</button>
       <button class="top-tab" data-page="captable" onclick="switchPage('captable')">Cap Table</button>
       <button class="top-tab" data-page="finance" onclick="switchPage('finance')">재무보고</button>
     </div>
@@ -369,38 +368,9 @@
   <div class="month-view" id="monthView"></div>
 </div>
 
-<!-- ===== PAGE: 일일업무보고 ===== -->
-<div class="page" id="page-daily">
-  <div class="page-header">
-    <div class="dept-tabs" id="dailyDeptTabs">
-      <button class="dept-tab active" onclick="switchDaily(0)">사업운영본부</button>
-      <button class="dept-tab" onclick="switchDaily(1)">전략기획본부</button>
-      <button class="dept-tab" onclick="switchDaily(2)">경영관리본부</button>
-    </div>
-    <div class="page-actions">
-      <button class="btn" onclick="openDailyInDrive()">📄 Drive에서 열기</button>
-      <button class="btn" onclick="loadDaily()">🔄</button>
-    </div>
-  </div>
-  <div class="iframe-page"><iframe id="dailyIframe" allow="clipboard-read; clipboard-write"></iframe></div>
-</div>
-
-<!-- ===== PAGE: 주간업무보고 ===== -->
-<div class="page" id="page-weekly">
-  <div class="page-header">
-    <div class="dept-tabs" id="weeklyDeptTabs">
-      <button class="dept-tab active" onclick="switchWeekly(0)">사업운영본부</button>
-      <button class="dept-tab" onclick="switchWeekly(1)">경영관리본부</button>
-      <button class="dept-tab" onclick="switchWeekly(2)">기술개발본부</button>
-      <button class="dept-tab" onclick="switchWeekly(3)">R&D 센터</button>
-      <button class="dept-tab" onclick="switchWeekly(-1)">전체 폴더</button>
-    </div>
-    <div class="page-actions">
-      <button class="btn" onclick="openWeeklyInDrive()">📄 Drive에서 열기</button>
-      <button class="btn" onclick="loadWeekly()">🔄</button>
-    </div>
-  </div>
-  <div class="iframe-page"><iframe id="weeklyIframe" allow="clipboard-read; clipboard-write"></iframe></div>
+<!-- ===== PAGE: 업무관리 ===== -->
+<div class="page" id="page-mgmt">
+  <div class="iframe-page"><iframe id="mgmtIframe" src="https://jun2857.github.io/mgmt/" allow="clipboard-read; clipboard-write"></iframe></div>
 </div>
 
 <!-- ===== PAGE: CAP TABLE ===== -->
@@ -467,23 +437,6 @@ const TIME_START=6,TIME_END=24;
 const P_CY=['high','mid','low'],S_CY=['pending','waiting','done'],DAYS_KR=['일','월','화','수','목','금','토'];
 let notifications=[];
 
-// 일일업무보고 config
-const DAILY_SHEETS=[
-  {name:'사업운영본부',id:'18CctaClFwjezRM7CfEjHBd5Qii3dUIJI'},
-  {name:'전략기획본부',id:'1Ht94d2ALwGlLJtYiKnCsD9beKOXqVR_4GWUMW-U9v18'},
-  {name:'경영관리본부',id:'1e1YMUni_fs2oMKySUl59XuwvzjS02qv3m68lhs5cTvg'}
-];
-let currentDailyDept=0;
-
-// 주간업무보고 config
-const WEEKLY_FOLDERS=[
-  {name:'사업운영본부',id:'1XIghDbbReBuH-HvF1HenN0GPVAtHOk1f'},
-  {name:'경영관리본부',id:'1Gi02skGxoqGHmxtNAlu0nc5JP6iAI2-j'},
-  {name:'기술개발본부',id:'1NxlL3VnQ6VT5oTNEfaYyfHiMDOCeGDde'},
-  {name:'R&D 센터',id:'1eyZbVM0F_dkBg0X_ns-WbOA8QvNnrf9V'}
-];
-const WEEKLY_ROOT='1bZBPupbEjtaBRC5ZAM0lItcZtTOaJoJp';
-let currentWeeklyDept=0;
 
 // ===== INIT =====
 function init(){
@@ -506,8 +459,6 @@ function switchPage(p){
   currentPage=p;
   document.querySelectorAll('.top-tab').forEach(b=>b.classList.toggle('active',b.dataset.page===p));
   document.querySelectorAll('.page').forEach(pg=>pg.classList.toggle('active',pg.id==='page-'+p));
-  if(p==='daily')loadDaily();
-  else if(p==='weekly')loadWeekly();
 }
 
 // ===== RIGHT PANEL TABS =====
@@ -696,37 +647,6 @@ function renderFeedItems(container,items){
   }).join('');
 }
 
-// ===== 일일업무보고 =====
-function switchDaily(i){
-  currentDailyDept=i;
-  document.querySelectorAll('#dailyDeptTabs .dept-tab').forEach((b,j)=>b.classList.toggle('active',j===i));
-  loadDaily();
-}
-function loadDaily(){
-  const s=DAILY_SHEETS[currentDailyDept];
-  document.getElementById('dailyIframe').src=`https://docs.google.com/spreadsheets/d/${s.id}/edit?rm=minimal`;
-}
-function openDailyInDrive(){
-  window.open(`https://docs.google.com/spreadsheets/d/${DAILY_SHEETS[currentDailyDept].id}/edit`,'_blank');
-}
-
-// ===== 주간업무보고 =====
-function switchWeekly(i){
-  currentWeeklyDept=i;
-  document.querySelectorAll('#weeklyDeptTabs .dept-tab').forEach((b,j)=>{
-    const idx=j<4?j:-1;
-    b.classList.toggle('active',idx===i);
-  });
-  loadWeekly();
-}
-function loadWeekly(){
-  const fid=currentWeeklyDept===-1?WEEKLY_ROOT:WEEKLY_FOLDERS[currentWeeklyDept].id;
-  document.getElementById('weeklyIframe').src=`https://drive.google.com/embeddedfolderview?id=${fid}#list`;
-}
-function openWeeklyInDrive(){
-  const fid=currentWeeklyDept===-1?WEEKLY_ROOT:WEEKLY_FOLDERS[currentWeeklyDept].id;
-  window.open(`https://drive.google.com/drive/folders/${fid}`,'_blank');
-}
 
 // ===== FIREBASE =====
 function initFirebase(){
