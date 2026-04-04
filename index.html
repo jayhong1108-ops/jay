@@ -71,7 +71,7 @@
   .stat-dot{width:7px;height:7px;border-radius:50%}
 
   /* === DAY VIEW === */
-  .main{display:grid;grid-template-columns:230px 1fr 280px;gap:0;flex:1;overflow:hidden}
+  .main{display:grid;grid-template-columns:230px 1fr 280px;gap:0;flex:1;overflow:hidden;min-height:0}
   .main.hidden{display:none}
   .schedule-col{grid-row:1/-1;border-right:1px solid var(--border);overflow-y:auto;background:var(--surface)}
   .col-header{padding:10px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:5}
@@ -85,7 +85,7 @@
   .time-content.has-content{background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.2);font-weight:500}
   .current-time-indicator{position:absolute;left:50px;right:6px;height:2px;background:var(--danger);z-index:2}
   .current-time-indicator::before{content:'';position:absolute;left:-4px;top:-3px;width:8px;height:8px;background:var(--danger);border-radius:50%}
-  .center-area{grid-row:1/-1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:14px}
+  .center-area{grid-row:1/-1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:14px;min-height:0}
   .task-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:1}
   .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--sh-sm)}
   .card-header{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
@@ -119,12 +119,12 @@
   .status-waiting{background:rgba(168,85,247,.15);color:var(--accent2)}
 
   /* RIGHT COLUMN - TABBED */
-  .right-col{grid-row:1/-1;border-left:1px solid var(--border);display:flex;flex-direction:column;background:var(--surface)}
+  .right-col{grid-row:1/-1;border-left:1px solid var(--border);display:flex;flex-direction:column;background:var(--surface);min-height:0;overflow:hidden}
   .right-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:5;background:var(--surface)}
   .right-tab{flex:1;padding:8px 4px;font-size:10px;font-weight:700;text-align:center;cursor:pointer;border:none;background:transparent;color:var(--text-dim);transition:all .15s;text-transform:uppercase;letter-spacing:.5px}
   .right-tab:hover{color:var(--text);background:var(--surface2)}
   .right-tab.active{color:var(--accent);border-bottom:2px solid var(--accent)}
-  .right-panel{display:none;flex:1;overflow-y:auto;flex-direction:column}
+  .right-panel{display:none;flex:1;overflow-y:auto;flex-direction:column;min-height:0}
   .right-panel.active{display:flex}
   .memo-body{flex:1;padding:10px}
   .memo-textarea{width:100%;height:100%;min-height:200px;background:transparent;border:none;color:var(--text);font-family:inherit;font-size:12px;line-height:1.7;resize:none;outline:none}
@@ -137,7 +137,7 @@
   .cal-setup-msg a{color:var(--accent);text-decoration:none}
 
   /* SLACK PANEL */
-  .slack-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:3}
+  .slack-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--surface);z-index:3;flex-shrink:0}
   .slack-header-title{font-size:11px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px}
   .slack-header-date{font-size:10px;color:var(--text-dim)}
   .slack-section{padding:10px 12px;border-bottom:1px solid var(--border)}
@@ -158,7 +158,7 @@
   .slack-ws-foodi{background:rgba(16,185,129,.12);color:var(--accent5)}
 
   /* STOCK PANEL */
-  .stock-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:3}
+  .stock-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--surface);z-index:3;flex-shrink:0}
   .stock-header-title{font-size:11px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px}
   .stock-header-time{font-size:10px;color:var(--text-dim)}
   .stock-header-actions{display:flex;gap:4px}
@@ -166,7 +166,7 @@
   .stock-refresh-btn:hover,.stock-add-btn:hover{background:var(--surface2);color:var(--text)}
   .stock-refresh-btn.loading{animation:spin 1s linear infinite}
   @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-  .stock-list{padding:6px}
+  .stock-list{padding:6px;overflow-y:auto;flex:1;min-height:0}
   .stock-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:8px;transition:background .15s;border-bottom:1px solid var(--border)}
   .stock-item:last-child{border-bottom:none}
   .stock-item:hover{background:var(--surface2)}
@@ -181,7 +181,7 @@
   .stock-item:hover .stock-item-delete{opacity:1}
   .stock-item-delete:hover{color:var(--danger)}
   .stock-empty{padding:24px 16px;text-align:center;color:var(--text-dim);font-size:11px;line-height:1.8}
-  .stock-add-form{display:none;padding:10px 12px;border-bottom:1px solid var(--border);background:var(--surface2)}
+  .stock-add-form{display:none;padding:10px 12px;border-bottom:1px solid var(--border);background:var(--surface2);flex-shrink:0}
   .stock-add-form.active{display:block}
   .stock-add-form input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;font-size:11px;margin-bottom:6px;font-family:inherit}
   .stock-add-form input:focus{outline:none;border-color:var(--accent)}
@@ -973,24 +973,40 @@ function toggleStockAddForm(){
 
 function addStockFromForm(){
   const symbolRaw=document.getElementById('stockInputSymbol').value.trim();
-  const name=document.getElementById('stockInputName').value.trim();
-  if(!symbolRaw){showToast('종목코드를 입력하세요');return;}
-  // Auto-detect market
-  let symbol=symbolRaw,market='KS';
-  if(/^[A-Z]{1,5}$/.test(symbolRaw)){market='US';symbol=symbolRaw;}
-  else if(symbolRaw.includes('.KQ')){market='KQ';symbol=symbolRaw;}
-  else if(symbolRaw.includes('.KS')){market='KS';symbol=symbolRaw;}
-  else{symbol=symbolRaw.replace(/[^0-9]/g,'')+'.KS';}
+  const nameRaw=document.getElementById('stockInputName').value.trim();
+  if(!symbolRaw&&!nameRaw){showToast('종목코드 또는 종목명을 입력하세요');return;}
+  let symbol='',name='',market='KS';
+  // Case 1: 종목코드만 입력
+  if(symbolRaw){
+    if(/^[A-Z]{1,5}$/.test(symbolRaw)){market='US';symbol=symbolRaw;}
+    else if(symbolRaw.includes('.KQ')){market='KQ';symbol=symbolRaw;}
+    else if(symbolRaw.includes('.KS')){market='KS';symbol=symbolRaw;}
+    else{symbol=symbolRaw.replace(/[^0-9]/g,'')+'.KS';}
+    name=nameRaw||symbol;
+  }
+  // Case 2: 종목명만 입력 → 종목명을 심볼로도 사용 (한글이면 검색 불가하므로 안내)
+  else if(nameRaw){
+    // 숫자면 종목코드로 처리
+    if(/^\d{4,6}$/.test(nameRaw)){symbol=nameRaw+'.KS';name=nameRaw;market='KS';}
+    else if(/^[A-Z]{1,5}$/.test(nameRaw)){symbol=nameRaw;name=nameRaw;market='US';}
+    else{
+      // 한글 종목명만 입력 → 잘 알려진 종목 매핑
+      const knownStocks={'삼성전자':'005930.KS','SK하이닉스':'000660.KS','카카오':'035720.KS','네이버':'035420.KS','NAVER':'035420.KS','셀트리온':'068270.KS','LG에너지솔루션':'373220.KS','LG에너지':'373220.KS','현대차':'005380.KS','현대자동차':'005380.KS','기아':'000270.KS','삼성SDI':'006400.KS','삼성바이오로직스':'207940.KS','삼성바이오':'207940.KS','포스코홀딩스':'005490.KS','KB금융':'105560.KS','신한지주':'055550.KS','카카오뱅크':'323410.KS','카카오페이':'377300.KS','크래프톤':'259960.KS','에코프로비엠':'247540.KQ','에코프로':'086520.KQ','엘앤에프':'066970.KQ','HLB':'028300.KQ','알테오젠':'196170.KQ','리가켐바이오':'141080.KQ'};
+      const match=knownStocks[nameRaw];
+      if(match){symbol=match;name=nameRaw;market=match.endsWith('.KQ')?'KQ':'KS';}
+      else{showToast('종목코드를 함께 입력하거나 빠른추가를 이용하세요');return;}
+    }
+  }
   const list=getWatchlist();
   if(list.find(s=>s.symbol===symbol)){showToast('이미 등록된 종목');return;}
-  list.push({symbol,name:name||symbol,market});
+  list.push({symbol,name,market});
   saveWatchlist(list);
   document.getElementById('stockInputSymbol').value='';
   document.getElementById('stockInputName').value='';
   toggleStockAddForm();
   renderStockList();
   fetchSingleStock(symbol);
-  showToast(`${name||symbol} 추가됨`);
+  showToast(`${name} 추가됨`);
 }
 
 function addStockPreset(code,name,market){
