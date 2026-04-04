@@ -253,9 +253,54 @@
     .brand{display:none}
     .week-grid{grid-template-columns:1fr}
   }
+
+  /* === PIN LOCK SCREEN === */
+  .pin-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column}
+  .pin-overlay.hidden{display:none}
+  .pin-container{text-align:center;max-width:320px;width:90%}
+  .pin-logo{font-size:28px;font-weight:700;color:var(--accent);margin-bottom:8px;letter-spacing:-.5px}
+  .pin-subtitle{color:var(--text-dim);font-size:13px;margin-bottom:32px}
+  .pin-dots{display:flex;justify-content:center;gap:14px;margin-bottom:28px;height:20px}
+  .pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--border);transition:all .2s}
+  .pin-dot.filled{background:var(--accent);border-color:var(--accent);transform:scale(1.15)}
+  .pin-dot.error{background:var(--danger);border-color:var(--danger);animation:pinShake .4s}
+  @keyframes pinShake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+  .pin-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:260px;margin:0 auto}
+  .pin-key{height:56px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:22px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;user-select:none;-webkit-tap-highlight-color:transparent}
+  .pin-key:hover{background:var(--surface2)}
+  .pin-key:active{background:var(--accent);color:#fff;transform:scale(.95)}
+  .pin-key.fn{font-size:14px;color:var(--text-dim);font-weight:500}
+  .pin-key.fn:active{background:var(--surface2);color:var(--text)}
+  .pin-error-msg{color:var(--danger);font-size:12px;margin-top:16px;min-height:18px;transition:opacity .2s}
+  .pin-setup-label{color:var(--accent3);font-size:12px;font-weight:600;margin-bottom:4px}
 </style>
 </head>
 <body>
+
+<!-- ===== PIN LOCK SCREEN ===== -->
+<div class="pin-overlay" id="pinOverlay">
+  <div class="pin-container">
+    <div class="pin-logo">■ Jay's CEO Dashboard</div>
+    <div class="pin-setup-label" id="pinSetupLabel" style="display:none"></div>
+    <div class="pin-subtitle" id="pinSubtitle">PIN을 입력하세요</div>
+    <div class="pin-dots" id="pinDots"></div>
+    <div class="pin-keypad">
+      <button class="pin-key" onclick="pinInput(1)">1</button>
+      <button class="pin-key" onclick="pinInput(2)">2</button>
+      <button class="pin-key" onclick="pinInput(3)">3</button>
+      <button class="pin-key" onclick="pinInput(4)">4</button>
+      <button class="pin-key" onclick="pinInput(5)">5</button>
+      <button class="pin-key" onclick="pinInput(6)">6</button>
+      <button class="pin-key" onclick="pinInput(7)">7</button>
+      <button class="pin-key" onclick="pinInput(8)">8</button>
+      <button class="pin-key" onclick="pinInput(9)">9</button>
+      <button class="pin-key fn" onclick="pinClear()">전체삭제</button>
+      <button class="pin-key" onclick="pinInput(0)">0</button>
+      <button class="pin-key fn" onclick="pinBackspace()">⌫</button>
+    </div>
+    <div class="pin-error-msg" id="pinErrorMsg"></div>
+  </div>
+</div>
 
 <!-- ===== TOP NAV ===== -->
 <div class="top-nav">
@@ -423,12 +468,129 @@
     <div class="setup-actions">
       <button class="btn" style="background:var(--accent2);color:#fff;border-color:var(--accent2)" onclick="saveCalendarConfig()">캘린더 저장</button>
     </div>
+
+    <h3>🔒 PIN 보안 설정</h3>
+    <p>대시보드 접근 시 PIN 인증이 필요합니다.</p>
+    <div class="setup-actions">
+      <button class="btn" style="background:var(--accent3);color:#fff;border-color:var(--accent3)" onclick="resetPin()">PIN 변경</button>
+      <button class="btn btn-danger" onclick="pinLogout()">로그아웃</button>
+    </div>
   </div>
 </div>
 <input type="file" id="importInput" accept=".json" style="display:none" onchange="handleImport(event)">
 <div class="toast" id="toast"></div>
 
 <script>
+// ===== PIN AUTH =====
+const PIN_HASH_KEY='dcc-pin-hash',PIN_AUTH_KEY='dcc-pin-auth',PIN_LENGTH=6;
+let pinBuffer='',pinMode='login',pinNewTemp='';
+
+async function hashPin(pin){
+  const enc=new TextEncoder().encode(pin+'jay-ceo-salt');
+  const buf=await crypto.subtle.digest('SHA-256',enc);
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+function initPinScreen(){
+  const hasPin=localStorage.getItem(PIN_HASH_KEY);
+  const isAuthed=sessionStorage.getItem(PIN_AUTH_KEY)==='true';
+  if(isAuthed&&hasPin){document.getElementById('pinOverlay').classList.add('hidden');init();return;}
+  if(!hasPin){
+    pinMode='setup';
+    document.getElementById('pinSetupLabel').style.display='block';
+    document.getElementById('pinSetupLabel').textContent='초기 설정';
+    document.getElementById('pinSubtitle').textContent='새 PIN을 입력하세요 (6자리)';
+  }
+  renderPinDots();
+}
+
+function renderPinDots(){
+  const c=document.getElementById('pinDots');
+  c.innerHTML=Array.from({length:PIN_LENGTH},(_,i)=>`<div class="pin-dot${i<pinBuffer.length?' filled':''}"></div>`).join('');
+}
+
+function pinInput(n){
+  if(pinBuffer.length>=PIN_LENGTH)return;
+  pinBuffer+=n;
+  renderPinDots();
+  if(pinBuffer.length===PIN_LENGTH)setTimeout(()=>pinSubmit(),200);
+}
+
+function pinBackspace(){pinBuffer=pinBuffer.slice(0,-1);renderPinDots();document.getElementById('pinErrorMsg').textContent='';}
+function pinClear(){pinBuffer='';renderPinDots();document.getElementById('pinErrorMsg').textContent='';}
+
+async function pinSubmit(){
+  const h=await hashPin(pinBuffer);
+  if(pinMode==='setup'){
+    pinNewTemp=h;pinBuffer='';pinMode='confirm';
+    document.getElementById('pinSetupLabel').textContent='확인';
+    document.getElementById('pinSubtitle').textContent='같은 PIN을 다시 입력하세요';
+    renderPinDots();return;
+  }
+  if(pinMode==='confirm'){
+    if(h===pinNewTemp){
+      localStorage.setItem(PIN_HASH_KEY,h);
+      sessionStorage.setItem(PIN_AUTH_KEY,'true');
+      document.getElementById('pinOverlay').classList.add('hidden');
+      showToast('PIN 설정 완료');init();
+    }else{
+      pinError('PIN이 일치하지 않습니다. 다시 설정하세요.');
+      pinMode='setup';pinNewTemp='';pinBuffer='';
+      document.getElementById('pinSetupLabel').textContent='초기 설정';
+      document.getElementById('pinSubtitle').textContent='새 PIN을 입력하세요 (6자리)';
+      renderPinDots();
+    }
+    return;
+  }
+  // login mode
+  const stored=localStorage.getItem(PIN_HASH_KEY);
+  if(h===stored){
+    sessionStorage.setItem(PIN_AUTH_KEY,'true');
+    document.getElementById('pinOverlay').classList.add('hidden');
+    init();
+  }else{
+    pinError('PIN이 올바르지 않습니다');
+    pinBuffer='';
+    document.querySelectorAll('.pin-dot').forEach(d=>{d.classList.remove('filled');d.classList.add('error');});
+    setTimeout(renderPinDots,500);
+  }
+}
+
+function pinError(msg){document.getElementById('pinErrorMsg').textContent=msg;}
+
+function resetPin(){
+  closeSetup();
+  pinMode='setup';pinBuffer='';pinNewTemp='';
+  document.getElementById('pinSetupLabel').style.display='block';
+  document.getElementById('pinSetupLabel').textContent='PIN 변경';
+  document.getElementById('pinSubtitle').textContent='새 PIN을 입력하세요 (6자리)';
+  document.getElementById('pinErrorMsg').textContent='';
+  renderPinDots();
+  document.getElementById('pinOverlay').classList.remove('hidden');
+}
+
+function pinLogout(){
+  sessionStorage.removeItem(PIN_AUTH_KEY);
+  pinMode='login';pinBuffer='';
+  document.getElementById('pinSetupLabel').style.display='none';
+  document.getElementById('pinSubtitle').textContent='PIN을 입력하세요';
+  document.getElementById('pinErrorMsg').textContent='';
+  renderPinDots();
+  document.getElementById('pinOverlay').classList.remove('hidden');
+  closeSetup();
+}
+
+// 키보드 입력 지원
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('pinOverlay').classList.contains('hidden'))return;
+  if(e.key>='0'&&e.key<='9')pinInput(parseInt(e.key));
+  else if(e.key==='Backspace')pinBackspace();
+  else if(e.key==='Escape')pinClear();
+});
+
+// 페이지 로드 시 PIN 체크
+document.addEventListener('DOMContentLoaded',initPinScreen);
+
 // ===== STATE =====
 let currentDate=new Date(),data={},currentView='day',currentPage='dashboard',currentRightTab='memo';
 let firebaseDb=null,firebaseRef=null,isFirebaseConnected=false,saveTimeout=null,ignoreNextFirebaseUpdate=false;
@@ -779,7 +941,7 @@ function seedInitialData(){
   saveLocalData();if(firebaseRef){ignoreNextFirebaseUpdate=true;firebaseRef.set(data);}
 }
 
-init();
+// init()은 PIN 인증 완료 후 initPinScreen()에서 호출됨
 </script>
 </body>
 </html>
