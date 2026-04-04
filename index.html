@@ -136,6 +136,27 @@
   .cal-setup-msg{padding:20px;text-align:center;color:var(--text-dim);font-size:12px;line-height:1.8}
   .cal-setup-msg a{color:var(--accent);text-decoration:none}
 
+  /* SLACK PANEL */
+  .slack-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:3}
+  .slack-header-title{font-size:11px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px}
+  .slack-header-date{font-size:10px;color:var(--text-dim)}
+  .slack-section{padding:10px 12px;border-bottom:1px solid var(--border)}
+  .slack-section-title{font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+  .slack-item{padding:6px 8px;border-radius:6px;margin-bottom:4px;font-size:11px;line-height:1.5;color:var(--text);transition:background .15s}
+  .slack-item:hover{background:var(--surface2)}
+  .slack-item-channel{font-size:9px;font-weight:700;color:var(--accent2);margin-bottom:2px}
+  .slack-item-text{color:var(--text);font-size:11px;line-height:1.5}
+  .slack-item-meta{font-size:9px;color:var(--text-dim);margin-top:2px}
+  .slack-priority{display:inline-block;font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;margin-right:4px}
+  .slack-p-high{background:rgba(239,68,68,.15);color:var(--danger)}
+  .slack-p-mid{background:rgba(245,158,11,.15);color:var(--accent3)}
+  .slack-p-low{background:rgba(34,197,94,.15);color:var(--success)}
+  .slack-empty{padding:20px;text-align:center;color:var(--text-dim);font-size:11px;line-height:1.8}
+  .slack-ws-badge{font-size:8px;padding:1px 5px;border-radius:3px;font-weight:600;margin-left:4px}
+  .slack-ws-clify{background:rgba(74,158,255,.12);color:var(--accent)}
+  .slack-ws-ncred{background:rgba(168,85,247,.12);color:var(--accent2)}
+  .slack-ws-foodi{background:rgba(16,185,129,.12);color:var(--accent5)}
+
   /* FEED PANEL */
   .feed-section{padding:12px;border-bottom:1px solid var(--border)}
   .feed-section-title{font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
@@ -368,12 +389,22 @@
     <div class="right-col">
       <div class="right-tabs">
         <button class="right-tab active" onclick="switchRightTab('memo')">Memo</button>
+        <button class="right-tab" onclick="switchRightTab('slack')">Slack</button>
         <button class="right-tab" onclick="switchRightTab('calendar')">Calendar</button>
         <button class="right-tab" onclick="switchRightTab('feed')">Feed</button>
       </div>
       <div class="right-panel active" id="panelMemo">
         <div style="padding:6px 14px;font-size:10px;color:var(--text-dim);text-align:right;border-bottom:1px solid var(--border)" id="memoCharCount">0자</div>
         <div class="memo-body"><textarea class="memo-textarea" id="memoArea" placeholder="메모, 아이디어, 회의록..." oninput="onMemoInput()"></textarea></div>
+      </div>
+      <div class="right-panel" id="panelSlack">
+        <div class="slack-header">
+          <div class="slack-header-title">💬 Slack Briefing</div>
+          <div class="slack-header-date" id="slackBriefDate">—</div>
+        </div>
+        <div id="slackBriefContent">
+          <div class="slack-empty">슬랙 브리핑 데이터가 없습니다.<br><br>Cowork에서 "슬랙 브리핑 업데이트"를<br>요청하면 자동으로 갱신됩니다.</div>
+        </div>
       </div>
       <div class="right-panel" id="panelCalendar">
         <div class="cal-iframe-wrap" id="calWrap">
@@ -605,7 +636,7 @@ function init(){
   loadLocalData();seedInitialData();initFirebase();
   renderDateDisplay();buildTimeSlots();loadDayData();
   updateCurrentTimeIndicator();setInterval(updateCurrentTimeIndicator,60000);
-  loadCalendarEmbed();loadEmailLinks();loadFeeds();loadDaouMail();fetchGcalEvents();
+  loadCalendarEmbed();loadEmailLinks();loadFeeds();loadDaouMail();fetchGcalEvents();loadSlackBriefing();
   requestNotificationPermission();
   // 30초마다 자동저장 (안전망)
   setInterval(()=>{if(currentView==='day'&&currentPage==='dashboard')saveDayData();},30000);
@@ -771,6 +802,59 @@ const FEED_URLS=[
   {name:'아웃스탠딩',rss:'https://outstanding.kr/feed/rss',icon:'📰'}
 ];
 let feedCache=[];
+// ===== SLACK BRIEFING =====
+const SLACK_BRIEF_KEY='dcc-slack-briefing';
+function loadSlackBriefing(){
+  const d=localStorage.getItem(SLACK_BRIEF_KEY);
+  if(!d){return;}
+  try{
+    const brief=JSON.parse(d);
+    document.getElementById('slackBriefDate').textContent=brief.date||'—';
+    const c=document.getElementById('slackBriefContent');
+    if(!brief.sections||!brief.sections.length){c.innerHTML='<div class="slack-empty">브리핑 데이터가 비어있습니다.</div>';return;}
+    c.innerHTML=brief.sections.map(s=>{
+      const pClass=s.priority==='high'?'slack-p-high':s.priority==='mid'?'slack-p-mid':'slack-p-low';
+      const pLabel=s.priority==='high'?'긴급':s.priority==='mid'?'주목':'일반';
+      const wsClass=s.workspace==='ncredible'?'slack-ws-ncred':s.workspace==='foodiversehq'?'slack-ws-foodi':'slack-ws-clify';
+      const wsLabel=s.workspace==='ncredible'?'NC':s.workspace==='foodiversehq'?'FD':'CL';
+      return `<div class="slack-section"><div class="slack-section-title"><span class="slack-priority ${pClass}">${pLabel}</span>${s.title}<span class="slack-ws-badge ${wsClass}">${wsLabel}</span></div>${s.items.map(i=>`<div class="slack-item"><div class="slack-item-channel">#${i.channel}</div><div class="slack-item-text">${i.text}</div><div class="slack-item-meta">${i.author} · ${i.time}</div></div>`).join('')}</div>`;
+    }).join('');
+  }catch(e){console.error('Slack briefing parse error',e);}
+}
+function updateSlackBriefing(briefData){
+  localStorage.setItem(SLACK_BRIEF_KEY,JSON.stringify(briefData));
+  loadSlackBriefing();
+}
+// 초기 브리핑 데이터 (Cowork에서 갱신 가능)
+if(!localStorage.getItem(SLACK_BRIEF_KEY)){
+  localStorage.setItem(SLACK_BRIEF_KEY,JSON.stringify({
+    date:'2026-04-05',
+    sections:[
+      {title:'중국 TF 공백',priority:'high',workspace:'clifyhq',items:[
+        {channel:'중국-진출-tf',text:'신지원 이사 퇴사 후 TF장 미지정. 싱가폴 바우스테드·WFOE 설립 등 미완 상태. 후임 지정 필요.',author:'신지원',time:'2026-02-12'}
+      ]},
+      {title:'시리즈A 이후 전략 숙제',priority:'high',workspace:'clifyhq',items:[
+        {channel:'팀장-및-임원방',text:'① B2B EAP 도입효과 증명 방법 ② 직원 프라이버시→사용률 저하 ③ 실시간 대시보드 설계. 임원진 후속 논의 필요.',author:'홍주열',time:'2026-02-21'}
+      ]},
+      {title:'더벤처스 투자계약',priority:'mid',workspace:'ncredible',items:[
+        {channel:'exec_connect',text:'투자계약서 초안 수령. 주주간 계약서(퇴사·겸업·경업금지) 별도 작성 필요. 3인 사인 필요.',author:'Seungyong Ahn',time:'2026-01-30'},
+        {channel:'exec_connect',text:'IR자료 최신본 공유 완료. 카벤 SaaS BM Q&A 문서 포함.',author:'홍주열',time:'2026-02-22'}
+      ]},
+      {title:'부산교육청 서비스 오픈',priority:'mid',workspace:'clifyhq',items:[
+        {channel:'clify-운영이슈',text:'2026-04-01 오픈 완료. 구글폼 설문 변경, 쿠팡 테스트계정 전달 완료. 일 2회(10시,16시) 문자/메일 발송 시작.',author:'박진',time:'2026-04-01'},
+        {channel:'clify-운영이슈',text:'나인벨 4월 입퇴사자 명단 → 계정 생성/비활성화 진행 중.',author:'서진호',time:'2026-04-03'}
+      ]},
+      {title:'인사·조직 변동',priority:'mid',workspace:'clifyhq',items:[
+        {channel:'임직원방',text:'박진희 과장 복직 (2026-04-01). 법무/인사 → 한승훈 팀장 이관 완료.',author:'강진아',time:'2026-04-01'},
+        {channel:'임직원방',text:'정부과제·법인 사이트 계정 통합관리 진행 중. 각 임직원 계정 공유 요청.',author:'강진아',time:'2026-03-03'}
+      ]},
+      {title:'이지미트(푸디버스)',priority:'low',workspace:'foodiversehq',items:[
+        {channel:'이지미트_내부소통방',text:'2025-08-19 이후 8개월 비활성. 모바일 반응형 배포 후 트래픽 보고 중단. 사업 상태 점검 필요.',author:'—',time:'2025-08-19'}
+      ]}
+    ]
+  }));
+}
+
 async function loadFeeds(){
   const container=document.getElementById('feedList');
   if(feedCache.length){renderFeedItems(container,feedCache);return;}
