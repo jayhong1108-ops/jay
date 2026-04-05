@@ -283,42 +283,43 @@
 
   /* === MOBILE === */
   @media(max-width:1024px){
-    .page{height:auto;min-height:calc(100vh - 48px);overflow-y:auto}
-    .main{display:flex!important;flex-direction:column;height:auto;flex:unset;overflow:visible}
-    .schedule-col{grid-row:auto;border-right:none;border-bottom:1px solid var(--border);max-height:280px;overflow-y:auto;width:100%}
-    .center-area{grid-row:auto;overflow-y:visible;min-height:auto;width:100%}
-    .right-col{grid-row:auto;border-left:none;border-top:1px solid var(--border);width:100%;max-height:none;overflow:visible;min-height:300px}
-    .task-grid{grid-template-columns:1fr}
-    .week-grid{grid-template-columns:repeat(3,1fr)}
+    .page{height:auto!important;min-height:calc(100vh - 48px)!important;overflow-y:auto!important;overflow-x:hidden!important}
+    .main{display:flex!important;flex-direction:column!important;height:auto!important;flex:none!important;overflow:visible!important;min-height:0!important}
+    .schedule-col{grid-row:auto!important;border-right:none!important;border-bottom:1px solid var(--border)!important;max-height:280px!important;overflow-y:auto!important;width:100%!important}
+    .center-area{grid-row:auto!important;overflow-y:visible!important;min-height:auto!important;width:100%!important;padding:10px!important}
+    .right-col{grid-row:auto!important;border-left:none!important;border-top:2px solid var(--accent)!important;width:100%!important;max-height:none!important;overflow:visible!important;min-height:360px!important}
+    .task-grid{grid-template-columns:1fr!important;gap:10px!important}
+    .week-grid{grid-template-columns:repeat(3,1fr)!important}
+    .header{flex-wrap:wrap!important;padding:8px 12px!important;gap:6px!important}
+    .header-left{width:100%!important;order:1!important}
+    .header-center{order:2!important}
+    .header-right{order:3!important;margin-left:auto!important}
+    .stats-bar{flex-wrap:wrap!important;padding:6px 12px!important;gap:6px!important}
+    .card-body{min-height:60px!important}
   }
   @media(max-width:768px){
-    .top-nav{padding:0 10px;height:44px;gap:8px}
-    .top-nav-left{gap:8px;overflow:hidden;flex:1}
-    .brand{font-size:13px}
-    .top-tab{padding:5px 10px;font-size:11px}
-    .header{padding:6px 12px;flex-wrap:wrap}
-    .header-left{flex:1;min-width:0}
-    .header-center{order:3;width:100%;justify-content:center}
-    .header-right{flex-shrink:0}
-    .stats-bar{padding:6px 12px;gap:6px;flex-wrap:wrap}
-    .center-area{padding:10px}
-    .task-grid{grid-template-columns:1fr!important;gap:10px}
-    .card-body{min-height:60px}
-    .week-grid{grid-template-columns:1fr 1fr;gap:6px}
-    .week-day-col{min-height:200px}
-    .month-cell{min-height:50px;padding:4px;border-radius:6px}
-    .month-date{font-size:11px;margin-bottom:2px}
-    .month-pct{font-size:11px}
-    .month-count-row{display:none}
-    .page-header{padding:8px 12px}
-    .dept-tab{padding:5px 10px;font-size:11px}
-    .date-display{min-width:120px;font-size:12px}
-    .btn{padding:4px 8px;font-size:11px}
-    .notif-dropdown{width:280px;right:-40px}
+    .top-nav{padding:0 10px!important;height:44px!important;gap:4px!important}
+    .top-nav-left{gap:4px!important;overflow-x:auto!important;flex:1!important}
+    .brand{font-size:12px!important}
+    .top-tab{padding:4px 8px!important;font-size:10px!important}
+    .date-nav button{width:28px!important;height:28px!important}
+    .date-display{min-width:100px!important;font-size:12px!important}
+    .btn{padding:4px 8px!important;font-size:11px!important}
+    .notif-dropdown{width:280px!important;right:-40px!important}
+    .week-grid{grid-template-columns:1fr 1fr!important;gap:6px!important}
+    .week-day-col{min-height:200px!important}
+    .month-cell{min-height:50px!important;padding:4px!important;border-radius:6px!important}
+    .month-date{font-size:11px!important;margin-bottom:2px!important}
+    .month-pct{font-size:11px!important}
+    .month-count-row{display:none!important}
+    .page-header{padding:8px 12px!important}
+    .dept-tab{padding:5px 10px!important;font-size:11px!important}
+    .right-tab{font-size:9px!important;padding:8px 2px!important}
   }
   @media(max-width:480px){
-    .brand{display:none}
-    .week-grid{grid-template-columns:1fr}
+    .brand{display:none!important}
+    .week-grid{grid-template-columns:1fr!important}
+    .header-right .btn{padding:3px 6px!important;font-size:10px!important}
   }
   /* === PIN LOCK SCREEN === */
   .pin-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column}
