@@ -281,6 +281,11 @@
 
   ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 
+  /* Mobile right-panel toggle button */
+  .mobile-right-toggle{display:none;position:fixed;bottom:20px;right:20px;z-index:199;width:48px;height:48px;border-radius:50%;background:var(--accent);color:#fff;border:none;box-shadow:0 4px 16px rgba(74,158,255,.4);cursor:pointer;align-items:center;justify-content:center;font-size:20px;transition:all .2s}
+  .mobile-right-toggle:active{transform:scale(.92)}
+  .mobile-right-toggle.open{background:var(--danger)}
+
   /* === MOBILE === */
   @media(max-width:1024px){
     .main{grid-template-columns:1fr!important;grid-template-rows:auto 1fr auto;height:auto;flex:unset;overflow:visible}
@@ -321,11 +326,6 @@
     .brand{display:none}
     .week-grid{grid-template-columns:1fr}
   }
-  /* Mobile right-panel toggle button */
-  .mobile-right-toggle{display:none;position:fixed;bottom:20px;right:20px;z-index:199;width:48px;height:48px;border-radius:50%;background:var(--accent);color:#fff;border:none;box-shadow:0 4px 16px rgba(74,158,255,.4);cursor:pointer;align-items:center;justify-content:center;font-size:20px;transition:all .2s}
-  .mobile-right-toggle:active{transform:scale(.92)}
-  .mobile-right-toggle.open{background:var(--danger)}
-
   /* === PIN LOCK SCREEN === */
   .pin-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column}
   .pin-overlay.hidden{display:none}
