@@ -281,21 +281,15 @@
 
   ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 
-  /* Mobile right-panel toggle button */
-  .mobile-right-toggle{display:none;position:fixed;bottom:20px;right:20px;z-index:199;width:48px;height:48px;border-radius:50%;background:var(--accent);color:#fff;border:none;box-shadow:0 4px 16px rgba(74,158,255,.4);cursor:pointer;align-items:center;justify-content:center;font-size:20px;transition:all .2s}
-  .mobile-right-toggle:active{transform:scale(.92)}
-  .mobile-right-toggle.open{background:var(--danger)}
-
   /* === MOBILE === */
   @media(max-width:1024px){
-    .main{grid-template-columns:1fr!important;grid-template-rows:auto 1fr auto;height:auto;flex:unset;overflow:visible}
-    .schedule-col{grid-row:auto!important;border-right:none;border-bottom:1px solid var(--border);max-height:280px;overflow-y:auto}
-    .center-area{grid-row:auto!important;overflow-y:visible;min-height:auto}
-    .right-col{grid-row:auto!important;border-left:none;border-top:1px solid var(--border);max-height:none;overflow:visible;display:none}
-    .right-col.mobile-open{display:flex;max-height:420px;overflow:hidden}
+    .page{height:auto;min-height:calc(100vh - 48px);overflow-y:auto}
+    .main{display:flex!important;flex-direction:column;height:auto;flex:unset;overflow:visible}
+    .schedule-col{grid-row:auto;border-right:none;border-bottom:1px solid var(--border);max-height:280px;overflow-y:auto;width:100%}
+    .center-area{grid-row:auto;overflow-y:visible;min-height:auto;width:100%}
+    .right-col{grid-row:auto;border-left:none;border-top:1px solid var(--border);width:100%;max-height:none;overflow:visible;min-height:300px}
     .task-grid{grid-template-columns:1fr}
     .week-grid{grid-template-columns:repeat(3,1fr)}
-    .mobile-right-toggle{display:flex!important}
   }
   @media(max-width:768px){
     .top-nav{padding:0 10px;height:44px;gap:8px}
@@ -598,7 +592,6 @@
 </div>
 <input type="file" id="importInput" accept=".json" style="display:none" onchange="handleImport(event)">
 <div class="toast" id="toast"></div>
-<button class="mobile-right-toggle" id="mobileRightToggle" onclick="toggleMobileRight()" title="메모/슬랙/주식">📋</button>
 
 <script>
 // ===== PIN AUTH =====
@@ -744,14 +737,6 @@ function switchPage(p){
 }
 
 // ===== RIGHT PANEL TABS =====
-function toggleMobileRight(){
-  const rc=document.querySelector('.right-col');
-  const btn=document.getElementById('mobileRightToggle');
-  const isOpen=rc.classList.toggle('mobile-open');
-  btn.classList.toggle('open',isOpen);
-  btn.textContent=isOpen?'✕':'📋';
-  if(isOpen){rc.scrollIntoView({behavior:'smooth',block:'start'});}
-}
 function switchRightTab(t){
   currentRightTab=t;
   document.querySelectorAll('.right-tab').forEach(b=>b.classList.toggle('active',b.textContent.toLowerCase()===t));
