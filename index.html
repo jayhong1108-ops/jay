@@ -328,6 +328,45 @@
   .toast{position:fixed;bottom:20px;right:20px;background:var(--text);color:var(--bg);padding:10px 18px;border-radius:10px;font-size:12px;font-weight:500;z-index:400;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;box-shadow:var(--sh-md)}
   .toast.show{opacity:1;transform:translateY(0);pointer-events:auto}
 
+  /* === RECURRING TASKS === */
+  .recurring-modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;width:440px;max-width:95vw;max-height:85vh;overflow-y:auto;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+  .recurring-modal h2{font-size:15px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;color:var(--accent6)}
+  .recurring-field{margin-bottom:14px}
+  .recurring-field label{display:block;font-size:11px;font-weight:600;color:var(--text-dim);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+  .recurring-field input,.recurring-field select{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-size:13px;font-family:inherit;outline:none}
+  .recurring-field input:focus,.recurring-field select:focus{border-color:var(--accent6)}
+  .recurring-field select{cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b6b80'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+  .recurring-row{display:flex;gap:10px}
+  .recurring-row .recurring-field{flex:1}
+  .recurring-days{display:flex;gap:4px;flex-wrap:wrap}
+  .recurring-day-btn{width:36px;height:32px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text-dim);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s}
+  .recurring-day-btn:hover{border-color:var(--accent6);color:var(--text)}
+  .recurring-day-btn.selected{background:var(--accent6);color:#fff;border-color:var(--accent6)}
+  .recurring-month-days{display:flex;gap:3px;flex-wrap:wrap}
+  .recurring-mday-btn{width:30px;height:28px;border-radius:5px;border:1px solid var(--border);background:var(--surface2);color:var(--text-dim);font-size:10px;font-weight:600;cursor:pointer;transition:all .15s}
+  .recurring-mday-btn:hover{border-color:var(--accent6);color:var(--text)}
+  .recurring-mday-btn.selected{background:var(--accent6);color:#fff;border-color:var(--accent6)}
+  .recurring-actions{display:flex;gap:8px;margin-top:18px;justify-content:flex-end}
+  .recurring-actions button{padding:8px 20px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;border:1px solid var(--border)}
+  .recurring-actions .btn-cancel{background:var(--surface2);color:var(--text-dim)}
+  .recurring-actions .btn-cancel:hover{background:var(--border);color:var(--text)}
+  .recurring-actions .btn-save{background:var(--accent6);color:#fff;border-color:var(--accent6)}
+  .recurring-actions .btn-save:hover{background:#7c4ddb}
+  .recurring-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;padding:1px 6px;border-radius:3px;background:rgba(139,92,246,.15);color:var(--accent6);font-weight:600;flex-shrink:0;margin-top:2px}
+  .recurring-mgr-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--surface2);margin-bottom:6px;border-left:3px solid var(--accent6);transition:all .15s}
+  .recurring-mgr-item.inactive{opacity:.45;border-left-color:var(--text-dim)}
+  .recurring-mgr-item:hover{background:rgba(30,30,48,.8)}
+  .recurring-mgr-body{flex:1;min-width:0}
+  .recurring-mgr-title{font-size:13px;font-weight:500;color:var(--text)}
+  .recurring-mgr-meta{font-size:10px;color:var(--text-dim);margin-top:2px;display:flex;gap:8px;align-items:center}
+  .recurring-mgr-meta span{display:flex;align-items:center;gap:3px}
+  .recurring-mgr-actions{display:flex;gap:4px;flex-shrink:0}
+  .recurring-mgr-actions button{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;font-size:12px;transition:all .15s;display:flex;align-items:center;justify-content:center}
+  .recurring-mgr-actions button:hover{background:var(--surface);color:var(--text)}
+  .card-header-actions{display:flex;gap:3px;align-items:center}
+  .card-add-recurring{width:24px;height:24px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--accent6);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .15s;font-weight:700}
+  .card-add-recurring:hover{background:rgba(139,92,246,.12);border-color:var(--accent6)}
+
   /* NOTIF DROPDOWN */
   .notif-dropdown{display:none;position:absolute;top:42px;right:0;width:320px;max-height:400px;overflow-y:auto;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--sh-md);z-index:250;padding:8px}
   .notif-dropdown.open{display:block}
@@ -471,6 +510,7 @@
       </div>
     </div>
     <div class="header-right">
+      <button class="btn" onclick="showRecurringMgr()" title="반복 Task 관리" style="color:var(--accent6)">↻</button>
       <button class="btn" onclick="showHistory()">📋</button>
       <button class="btn" onclick="exportData()">💾</button>
       <button class="btn" onclick="importData()">📂</button>
@@ -485,9 +525,9 @@
     </div>
     <div class="center-area">
       <div class="task-grid">
-        <div class="card"><div class="card-header"><div class="card-title"><span style="color:var(--accent)">●</span> Business Tasks <span class="card-badge" style="background:rgba(74,158,255,.12);color:var(--accent)" id="bizCount">0</span></div><button class="card-add" onclick="addTask('business')">+</button></div><div class="card-body" id="businessList"></div></div>
-        <div class="card"><div class="card-header"><div class="card-title"><span style="color:var(--accent2)">●</span> Personal Tasks <span class="card-badge" style="background:rgba(168,85,247,.12);color:var(--accent2)" id="personalCount">0</span></div><button class="card-add" onclick="addTask('personal')">+</button></div><div class="card-body" id="personalList"></div></div>
-        <div class="card"><div class="card-header"><div class="card-title"><span style="color:var(--accent3)">●</span> In Progress <span class="card-badge" style="background:rgba(245,158,11,.12);color:var(--accent3)" id="progressCount">0</span></div><button class="card-add" onclick="addTask('progress')">+</button></div><div class="card-body" id="progressList"></div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><span style="color:var(--accent)">●</span> Business Tasks <span class="card-badge" style="background:rgba(74,158,255,.12);color:var(--accent)" id="bizCount">0</span></div><div class="card-header-actions"><button class="card-add-recurring" onclick="openRecurringModal('business')" title="반복 Task 등록">↻</button><button class="card-add" onclick="addTask('business')">+</button></div></div><div class="card-body" id="businessList"></div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><span style="color:var(--accent2)">●</span> Personal Tasks <span class="card-badge" style="background:rgba(168,85,247,.12);color:var(--accent2)" id="personalCount">0</span></div><div class="card-header-actions"><button class="card-add-recurring" onclick="openRecurringModal('personal')" title="반복 Task 등록">↻</button><button class="card-add" onclick="addTask('personal')">+</button></div></div><div class="card-body" id="personalList"></div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><span style="color:var(--accent3)">●</span> In Progress <span class="card-badge" style="background:rgba(245,158,11,.12);color:var(--accent3)" id="progressCount">0</span></div><div class="card-header-actions"><button class="card-add-recurring" onclick="openRecurringModal('progress')" title="반복 Task 등록">↻</button><button class="card-add" onclick="addTask('progress')">+</button></div></div><div class="card-body" id="progressList"></div></div>
         <div class="card"><div class="card-header"><div class="card-title"><span style="color:var(--accent4)">●</span> Directives <span class="card-badge" style="background:rgba(236,72,153,.12);color:var(--accent4)" id="directiveCount">0</span></div><button class="card-add" onclick="addDirective()">+</button></div><div class="card-body" id="directiveList"></div></div>
       </div>
     </div>
@@ -679,6 +719,77 @@
   </div>
 </div>
 <input type="file" id="importInput" accept=".json" style="display:none" onchange="handleImport(event)">
+
+<!-- RECURRING TASK MODAL -->
+<div class="overlay" id="recurringOverlay" onclick="if(event.target===this)closeRecurringModal()">
+  <div class="recurring-modal">
+    <h2>↻ 반복 Task 등록</h2>
+    <input type="hidden" id="recEditId" value="">
+    <div class="recurring-field">
+      <label>Task 내용</label>
+      <input type="text" id="recTaskText" placeholder="반복할 Task를 입력하세요..." autocomplete="off">
+    </div>
+    <div class="recurring-row">
+      <div class="recurring-field">
+        <label>카테고리</label>
+        <select id="recSection">
+          <option value="business">Business Tasks</option>
+          <option value="personal">Personal Tasks</option>
+          <option value="progress">In Progress</option>
+        </select>
+      </div>
+      <div class="recurring-field">
+        <label>우선순위</label>
+        <select id="recPriority">
+          <option value="high">!!! 높음</option>
+          <option value="mid" selected>!! 보통</option>
+          <option value="low">! 낮음</option>
+        </select>
+      </div>
+    </div>
+    <div class="recurring-field">
+      <label>반복 유형</label>
+      <select id="recType" onchange="onRecTypeChange()">
+        <option value="weekly">매주 반복</option>
+        <option value="monthly">매달 반복</option>
+      </select>
+    </div>
+    <div class="recurring-field" id="recWeeklyField">
+      <label>반복 요일 (복수 선택 가능)</label>
+      <div class="recurring-days" id="recWeekDays">
+        <button class="recurring-day-btn" data-day="1" onclick="toggleRecDay(this)">월</button>
+        <button class="recurring-day-btn" data-day="2" onclick="toggleRecDay(this)">화</button>
+        <button class="recurring-day-btn" data-day="3" onclick="toggleRecDay(this)">수</button>
+        <button class="recurring-day-btn" data-day="4" onclick="toggleRecDay(this)">목</button>
+        <button class="recurring-day-btn" data-day="5" onclick="toggleRecDay(this)">금</button>
+        <button class="recurring-day-btn" data-day="6" onclick="toggleRecDay(this)">토</button>
+        <button class="recurring-day-btn" data-day="0" onclick="toggleRecDay(this)">일</button>
+      </div>
+    </div>
+    <div class="recurring-field" id="recMonthlyField" style="display:none">
+      <label>반복 날짜 (복수 선택 가능)</label>
+      <div class="recurring-month-days" id="recMonthDays"></div>
+    </div>
+    <div class="recurring-actions">
+      <button class="btn-cancel" onclick="closeRecurringModal()">취소</button>
+      <button class="btn-save" onclick="saveRecurringTask()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- RECURRING TASK MANAGER -->
+<div class="overlay" id="recurringMgrOverlay" onclick="if(event.target===this)closeRecurringMgr()">
+  <div class="panel" style="width:560px">
+    <div class="panel-title">↻ 반복 Task 관리 <button class="btn" onclick="closeRecurringMgr()" style="margin-left:auto;font-size:11px">닫기</button></div>
+    <div style="display:flex;gap:6px;margin-bottom:12px">
+      <button class="btn" style="background:var(--accent6);color:#fff;border-color:var(--accent6);font-size:11px" onclick="closeRecurringMgr();openRecurringModal('business')">+ 새 반복 Task</button>
+      <div style="flex:1"></div>
+      <span style="font-size:11px;color:var(--text-dim);display:flex;align-items:center;gap:4px">총 <strong id="recMgrCount">0</strong>개</span>
+    </div>
+    <div id="recurringMgrList" style="max-height:55vh;overflow-y:auto"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -803,7 +914,7 @@ let notifications=[];
 
 // ===== INIT =====
 function init(){
-  loadLocalData();seedInitialData();initFirebase();
+  loadLocalData();loadRecurringTasks();seedInitialData();initFirebase();initRecMonthDays();
   renderDateDisplay();buildTimeSlots();loadDayData();
   updateCurrentTimeIndicator();setInterval(updateCurrentTimeIndicator,60000);
   loadCalendarEmbed();loadEmailLinks();loadFeeds();loadDaouMail();fetchGcalEvents();loadSlackBriefing();initStockPanel();
@@ -1255,7 +1366,7 @@ function initFirebase(){
     firebaseDb=firebase.database();firebaseRef=firebaseDb.ref('commandCenter');
     firebaseRef.on('value',s=>{
       if(ignoreNextFirebaseUpdate){ignoreNextFirebaseUpdate=false;return;}
-      const d=s.val();if(d){data=d;saveLocalData();if(currentView==='day'&&currentPage==='dashboard')loadDayData();else if(currentView==='week')renderWeekView();else if(currentView==='month')renderMonthView();}
+      const d=s.val();if(d){if(d.recurringTasks){recurringTasks=d.recurringTasks;localStorage.setItem(REC_KEY,JSON.stringify(recurringTasks));delete d.recurringTasks;}data=d;saveLocalData();if(currentView==='day'&&currentPage==='dashboard')loadDayData();else if(currentView==='week')renderWeekView();else if(currentView==='month')renderMonthView();}
       isFirebaseConnected=true;updateSyncUI('online');
     });
     firebase.database().ref('.info/connected').on('value',s=>updateSyncUI(s.val()?'online':'offline'));
@@ -1361,9 +1472,166 @@ function renderScheduleList(){
 }
 function updateCurrentTimeIndicator(){/* noop — replaced by .past class */}
 
+// ===== RECURRING TASKS =====
+const REC_KEY='dcc-recurring-tasks';
+let recurringTasks=[];
+
+function loadRecurringTasks(){try{recurringTasks=JSON.parse(localStorage.getItem(REC_KEY))||[];}catch(e){recurringTasks=[];}}
+function saveRecurringTasks(){localStorage.setItem(REC_KEY,JSON.stringify(recurringTasks));if(firebaseRef){ignoreNextFirebaseUpdate=true;firebaseRef.child('recurringTasks').set(recurringTasks);}}
+
+function initRecMonthDays(){
+  const c=document.getElementById('recMonthDays');c.innerHTML='';
+  for(let d=1;d<=31;d++){const b=document.createElement('button');b.className='recurring-mday-btn';b.dataset.day=d;b.textContent=d;b.onclick=function(){this.classList.toggle('selected');};c.appendChild(b);}
+}
+
+function onRecTypeChange(){
+  const t=document.getElementById('recType').value;
+  document.getElementById('recWeeklyField').style.display=t==='weekly'?'':'none';
+  document.getElementById('recMonthlyField').style.display=t==='monthly'?'':'none';
+}
+
+function toggleRecDay(btn){btn.classList.toggle('selected');}
+
+function openRecurringModal(section,editId){
+  document.getElementById('recEditId').value=editId||'';
+  document.getElementById('recTaskText').value='';
+  document.getElementById('recSection').value=section||'business';
+  document.getElementById('recPriority').value='mid';
+  document.getElementById('recType').value='weekly';
+  onRecTypeChange();
+  document.querySelectorAll('.recurring-day-btn').forEach(b=>b.classList.remove('selected'));
+  initRecMonthDays();
+  if(editId){
+    const rt=recurringTasks.find(r=>r.id===editId);
+    if(rt){
+      document.getElementById('recTaskText').value=rt.text;
+      document.getElementById('recSection').value=rt.section;
+      document.getElementById('recPriority').value=rt.priority;
+      document.getElementById('recType').value=rt.type;
+      onRecTypeChange();
+      if(rt.type==='weekly'){
+        (rt.days||[]).forEach(d=>{const b=document.querySelector(`.recurring-day-btn[data-day="${d}"]`);if(b)b.classList.add('selected');});
+      }else{
+        (rt.days||[]).forEach(d=>{const b=document.querySelector(`.recurring-mday-btn[data-day="${d}"]`);if(b)b.classList.add('selected');});
+      }
+    }
+  }
+  document.getElementById('recurringOverlay').classList.add('active');
+  setTimeout(()=>document.getElementById('recTaskText').focus(),100);
+}
+
+function closeRecurringModal(){document.getElementById('recurringOverlay').classList.remove('active');}
+
+function saveRecurringTask(){
+  const text=document.getElementById('recTaskText').value.trim();
+  if(!text){showToast('Task 내용을 입력하세요');return;}
+  const type=document.getElementById('recType').value;
+  let days=[];
+  if(type==='weekly'){
+    document.querySelectorAll('.recurring-day-btn.selected').forEach(b=>days.push(parseInt(b.dataset.day)));
+    if(!days.length){showToast('반복 요일을 선택하세요');return;}
+  }else{
+    document.querySelectorAll('.recurring-mday-btn.selected').forEach(b=>days.push(parseInt(b.dataset.day)));
+    if(!days.length){showToast('반복 날짜를 선택하세요');return;}
+  }
+  const editId=document.getElementById('recEditId').value;
+  const rec={
+    id:editId||'rt_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+    text,
+    section:document.getElementById('recSection').value,
+    priority:document.getElementById('recPriority').value,
+    type,
+    days:days.sort((a,b)=>a-b),
+    active:true,
+    createdAt:dateKey(new Date())
+  };
+  if(editId){const idx=recurringTasks.findIndex(r=>r.id===editId);if(idx>=0)recurringTasks[idx]=rec;}
+  else recurringTasks.push(rec);
+  saveRecurringTasks();
+  closeRecurringModal();
+  showToast(editId?'반복 Task 수정 완료':'반복 Task 등록 완료');
+  // 현재 날짜에 해당하면 바로 적용
+  applyRecurringTasks();
+}
+
+function applyRecurringTasks(){
+  const d=currentDate,dow=d.getDay(),dom=d.getDate(),key=dateKey();
+  const dayData=data[key];
+  recurringTasks.forEach(rt=>{
+    if(!rt.active)return;
+    let match=false;
+    if(rt.type==='weekly'&&rt.days.includes(dow))match=true;
+    if(rt.type==='monthly'&&rt.days.includes(dom))match=true;
+    if(!match)return;
+    // 이미 같은 텍스트의 반복 Task가 존재하면 중복 추가하지 않음
+    const list=document.getElementById(rt.section+'List');
+    const existing=[...list.querySelectorAll('.task-text')].map(el=>el.value.trim());
+    if(existing.includes(rt.text))return;
+    // 저장된 데이터에서도 체크 (done 상태 유지)
+    if(dayData&&dayData.tasks&&dayData.tasks[rt.section]){
+      const found=dayData.tasks[rt.section].find(t=>t.text===rt.text&&t.recurring);
+      if(found)return; // 이미 데이터에 있음 (loadDayData에서 렌더링 됨)
+    }
+    const item=createTaskItem(rt.section,{text:rt.text,done:false,priority:rt.priority,carried:false,recurring:true,recurringId:rt.id});
+    list.appendChild(item);
+  });
+  updateCounts();
+}
+
+function getRecurrenceLabel(rt){
+  const dayNames=['일','월','화','수','목','금','토'];
+  if(rt.type==='weekly'){
+    return '매주 '+rt.days.map(d=>dayNames[d]).join(', ');
+  }else{
+    return '매월 '+rt.days.join(', ')+'일';
+  }
+}
+
+function showRecurringMgr(){
+  const list=document.getElementById('recurringMgrList');
+  document.getElementById('recMgrCount').textContent=recurringTasks.length;
+  if(!recurringTasks.length){
+    list.innerHTML='<div style="padding:24px;text-align:center;color:var(--text-dim);font-size:12px">등록된 반복 Task가 없습니다.<br>카드 헤더의 ↻ 버튼으로 추가할 수 있습니다.</div>';
+  }else{
+    const secNames={business:'Business',personal:'Personal',progress:'In Progress'};
+    const secColors={business:'var(--accent)',personal:'var(--accent2)',progress:'var(--accent3)'};
+    list.innerHTML=recurringTasks.map(rt=>`
+      <div class="recurring-mgr-item ${rt.active?'':'inactive'}">
+        <div class="recurring-mgr-body">
+          <div class="recurring-mgr-title">${escHtml(rt.text)}</div>
+          <div class="recurring-mgr-meta">
+            <span style="color:${secColors[rt.section]||'var(--text-dim)'}">● ${secNames[rt.section]||rt.section}</span>
+            <span>↻ ${getRecurrenceLabel(rt)}</span>
+            <span>${rt.priority==='high'?'!!!':rt.priority==='mid'?'!!':'!'}</span>
+          </div>
+        </div>
+        <div class="recurring-mgr-actions">
+          <button onclick="toggleRecurringActive('${rt.id}')" title="${rt.active?'비활성화':'활성화'}">${rt.active?'⏸':'▶'}</button>
+          <button onclick="closeRecurringMgr();openRecurringModal('${rt.section}','${rt.id}')" title="수정">✏</button>
+          <button onclick="deleteRecurringTask('${rt.id}')" title="삭제" style="color:var(--danger)">✕</button>
+        </div>
+      </div>
+    `).join('');
+  }
+  document.getElementById('recurringMgrOverlay').classList.add('active');
+}
+
+function closeRecurringMgr(){document.getElementById('recurringMgrOverlay').classList.remove('active');}
+
+function toggleRecurringActive(id){
+  const rt=recurringTasks.find(r=>r.id===id);
+  if(rt){rt.active=!rt.active;saveRecurringTasks();showRecurringMgr();showToast(rt.active?'반복 Task 활성화':'반복 Task 비활성화');}
+}
+
+function deleteRecurringTask(id){
+  if(!confirm('이 반복 Task를 삭제하시겠습니까?'))return;
+  recurringTasks=recurringTasks.filter(r=>r.id!==id);
+  saveRecurringTasks();showRecurringMgr();showToast('반복 Task 삭제 완료');
+}
+
 // ===== TASKS =====
 function addTask(s){const l=document.getElementById(s+'List'),item=createTaskItem(s,{text:'',done:false,priority:'mid',carried:false});l.appendChild(item);item.querySelector('.task-text').focus();updateCounts();}
-function createTaskItem(s,td){const div=document.createElement('div');div.className='task-item'+(td.carried?' carried-over':'');let carry=td.carried?`<span class="carry-tag">↻${td.carriedFrom||''}</span>`:'';div.innerHTML=`<div class="task-check ${td.done?'checked':''}" onclick="toggleCheck(this)"></div><span class="task-priority priority-${td.priority}" onclick="cyclePriority(this)">${td.priority==='high'?'!!!':td.priority==='mid'?'!!':'!'}</span><textarea class="task-text ${td.done?'completed':''}" rows="1" oninput="autoResize(this);debounceSave()" onblur="debounceSave()" onkeydown="handleTaskKey(event,'${s}')" placeholder="할 일 입력...">${td.text}</textarea>${carry}<button class="task-delete" onclick="deleteTask(this)">✕</button>`;setTimeout(()=>autoResize(div.querySelector('.task-text')),0);return div;}
+function createTaskItem(s,td){const div=document.createElement('div');div.className='task-item'+(td.carried?' carried-over':'');if(td.recurring)div.dataset.recurringId=td.recurringId||'';let carry=td.carried?`<span class="carry-tag">↻${td.carriedFrom||''}</span>`:'';let recBadge=td.recurring?'<span class="recurring-badge">↻ 반복</span>':'';div.innerHTML=`<div class="task-check ${td.done?'checked':''}" onclick="toggleCheck(this)"></div><span class="task-priority priority-${td.priority}" onclick="cyclePriority(this)">${td.priority==='high'?'!!!':td.priority==='mid'?'!!':'!'}</span><textarea class="task-text ${td.done?'completed':''}" rows="1" oninput="autoResize(this);debounceSave()" onblur="debounceSave()" onkeydown="handleTaskKey(event,'${s}')" placeholder="할 일 입력...">${td.text}</textarea>${recBadge}${carry}<button class="task-delete" onclick="deleteTask(this)">✕</button>`;setTimeout(()=>autoResize(div.querySelector('.task-text')),0);return div;}
 function toggleCheck(el){el.classList.toggle('checked');el.parentElement.querySelector('.task-text').classList.toggle('completed');updateCounts();debounceSave();}
 function cyclePriority(el){const c=el.classList.contains('priority-high')?'high':el.classList.contains('priority-mid')?'mid':'low';const n=P_CY[(P_CY.indexOf(c)+1)%3];el.className=`task-priority priority-${n}`;el.textContent=n==='high'?'!!!':n==='mid'?'!!':'!';debounceSave();}
 function deleteTask(el){el.parentElement.remove();updateCounts();debounceSave();}
@@ -1559,7 +1827,7 @@ function showAutoSaved(){const el=document.getElementById('syncStatus');const pr
 function saveDayData(){
   if(currentView!=='day'||currentPage!=='dashboard')return;
   const key=dateKey(),dd={tasks:{},schedule:{},directives:[],memo:''};
-  ['business','personal','progress'].forEach(s=>{dd.tasks[s]=[];document.getElementById(s+'List').querySelectorAll('.task-item').forEach(item=>{const text=item.querySelector('.task-text').value;if(text.trim()||document.activeElement===item.querySelector('.task-text')){const pEl=item.querySelector('.task-priority'),p=pEl.classList.contains('priority-high')?'high':pEl.classList.contains('priority-mid')?'mid':'low';dd.tasks[s].push({text,done:item.querySelector('.task-check').classList.contains('checked'),priority:p,carried:item.classList.contains('carried-over'),carriedFrom:item.querySelector('.carry-tag')?.textContent.replace('↻','')||''});}});});
+  ['business','personal','progress'].forEach(s=>{dd.tasks[s]=[];document.getElementById(s+'List').querySelectorAll('.task-item').forEach(item=>{const text=item.querySelector('.task-text').value;if(text.trim()||document.activeElement===item.querySelector('.task-text')){const pEl=item.querySelector('.task-priority'),p=pEl.classList.contains('priority-high')?'high':pEl.classList.contains('priority-mid')?'mid':'low';const isRec=!!item.querySelector('.recurring-badge'),recId=item.dataset.recurringId||'';dd.tasks[s].push({text,done:item.querySelector('.task-check').classList.contains('checked'),priority:p,carried:item.classList.contains('carried-over'),carriedFrom:item.querySelector('.carry-tag')?.textContent.replace('↻','')||'',recurring:isRec,recurringId:recId});}});});
   dd.schedule=[];document.querySelectorAll('.schedule-item').forEach(item=>{const inputs=item.querySelectorAll('.schedule-time-input');const title=item.querySelector('.schedule-title').value;if(title.trim()||document.activeElement===item.querySelector('.schedule-title')){dd.schedule.push({start:inputs[0].value,end:inputs[1].value,title,gcal:item.classList.contains('gcal')});}});
   document.getElementById('directiveList').querySelectorAll('.directive-item').forEach(item=>{const text=item.querySelector('.directive-text').value;if(text.trim()||document.activeElement===item.querySelector('.directive-text')){const sEl=item.querySelector('.directive-status'),st=sEl.classList.contains('status-done')?'done':sEl.classList.contains('status-waiting')?'waiting':'pending';dd.directives.push({text,assignee:item.querySelector('input[type="text"]').value,status:st,carried:item.classList.contains('carried-over')});}});
   dd.memo=document.getElementById('memoArea').value;dd.lastModified=new Date().toISOString();data[key]=dd;saveLocalData();
@@ -1582,6 +1850,8 @@ function loadDayData(){
     document.getElementById('memoArea').value=dayData.memo||'';
   }else{document.getElementById('memoArea').value='';renderScheduleList();}
   document.getElementById('memoCharCount').textContent=document.getElementById('memoArea').value.length+'자';updateMemoTags();updateCounts();updateCurrentTimeIndicator();
+  // 반복 Task 자동 적용
+  applyRecurringTasks();
 }
 
 // ===== WEEK VIEW =====
