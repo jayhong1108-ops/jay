@@ -475,6 +475,55 @@
   .ic-form-actions{display:flex;gap:8px;margin-top:18px;justify-content:flex-end}
   .ic-form-actions button{padding:9px 24px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);transition:all .15s}
 
+  /* === DAILY REPORT === */
+  .dr-container{height:calc(100vh - 48px);display:flex;flex-direction:column;overflow:hidden}
+  .dr-header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);background:var(--surface);flex-wrap:wrap;gap:8px}
+  .dr-header-left{display:flex;align-items:center;gap:10px}
+  .dr-title{font-size:17px;font-weight:700;color:var(--accent)}
+  .dr-header-right{display:flex;gap:6px;align-items:center}
+  .dr-filters{display:flex;align-items:center;gap:8px;padding:10px 20px;border-bottom:1px solid var(--border);background:var(--surface);flex-wrap:wrap}
+  .dr-date-nav{display:flex;align-items:center;gap:4px}
+  .dr-date-nav button{width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center}
+  .dr-date-nav button:hover{background:var(--border)}
+  .dr-date-display{font-size:14px;font-weight:600;min-width:130px;text-align:center;cursor:pointer;padding:4px 10px;border-radius:6px}
+  .dr-team-tabs{display:flex;gap:2px;background:var(--surface2);border-radius:8px;padding:2px}
+  .dr-team-tab{padding:5px 14px;font-size:11px;font-weight:600;border-radius:6px;cursor:pointer;border:none;background:transparent;color:var(--text-dim);transition:all .15s}
+  .dr-team-tab.active{background:var(--accent);color:#fff}
+  .dr-team-tab:hover:not(.active){background:var(--border);color:var(--text)}
+  .dr-status{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-dim)}
+  .dr-status .dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+  .dr-body{flex:1;overflow-y:auto;padding:16px 20px}
+  .dr-team-section{margin-bottom:24px}
+  .dr-team-title{font-size:13px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;display:flex;align-items:center;gap:8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+  .dr-team-title .team-dot{width:10px;height:10px;border-radius:3px}
+  .dr-category{margin-bottom:12px}
+  .dr-cat-header{font-size:12px;font-weight:600;color:var(--accent6);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+  .dr-cat-header .cat-tag{font-size:9px;padding:2px 7px;border-radius:4px;background:rgba(139,92,246,.1);color:var(--accent6);font-weight:700}
+  .dr-item{display:flex;gap:10px;padding:10px 12px;margin-bottom:4px;border-radius:8px;background:var(--surface);border:1px solid var(--border);transition:all .15s;cursor:pointer;position:relative}
+  .dr-item:hover{border-color:var(--accent);box-shadow:var(--sh-sm)}
+  .dr-item-left{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:60px}
+  .dr-item-company{font-size:10px;font-weight:700;color:var(--accent3);text-align:center;word-break:keep-all}
+  .dr-item-writer{font-size:9px;color:var(--text-dim);background:var(--surface2);padding:1px 6px;border-radius:3px}
+  .dr-item-content{flex:1;font-size:12px;color:var(--text);line-height:1.6;white-space:pre-wrap}
+  .dr-item-detail{font-size:10px;color:var(--text-dim);margin-top:4px}
+  .dr-empty{text-align:center;padding:40px 20px;color:var(--text-dim);font-size:13px;line-height:2}
+  .dr-summary-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:20px}
+  .dr-summary-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center}
+  .dr-summary-num{font-size:22px;font-weight:700;color:var(--accent)}
+  .dr-summary-label{font-size:10px;color:var(--text-dim);margin-top:2px}
+  .dr-setup-guide{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;max-width:600px;margin:40px auto}
+  .dr-setup-guide h3{font-size:14px;color:var(--accent);margin-bottom:12px}
+  .dr-setup-guide ol{font-size:12px;color:var(--text);line-height:2;padding-left:20px}
+  .dr-setup-guide code{background:rgba(74,158,255,.1);color:var(--accent);padding:1px 5px;border-radius:3px;font-size:11px}
+  .dr-detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;backdrop-filter:blur(4px);display:none;justify-content:center;align-items:center}
+  .dr-detail-overlay.active{display:flex}
+  .dr-detail-modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;width:600px;max-width:95vw;max-height:80vh;overflow-y:auto;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+  .dr-detail-title{font-size:14px;font-weight:700;color:var(--accent);margin-bottom:4px}
+  .dr-detail-meta{font-size:11px;color:var(--text-dim);margin-bottom:12px}
+  .dr-detail-content{font-size:13px;color:var(--text);line-height:1.8;white-space:pre-wrap;background:var(--surface2);border-radius:8px;padding:14px;border:1px solid var(--border)}
+  .dr-original-link{display:inline-flex;align-items:center;gap:4px;margin-top:12px;font-size:11px;color:var(--accent);text-decoration:none;padding:6px 12px;border-radius:6px;background:rgba(74,158,255,.08);border:1px solid rgba(74,158,255,.2)}
+  .dr-original-link:hover{background:rgba(74,158,255,.15)}
+
   /* === MOBILE === */
   @media(max-width:1024px){
     .page{height:auto!important;min-height:calc(100vh - 48px)!important;overflow-y:auto!important;overflow-x:hidden!important}
@@ -490,6 +539,12 @@
     .ic-detail-top{flex-direction:column!important;align-items:center!important;text-align:center}
     .ic-info-grid{grid-template-columns:1fr!important}
     .ic-form-row{flex-direction:column!important}
+    .dr-container{height:auto!important;min-height:calc(100vh - 48px)!important}
+    .dr-header{flex-wrap:wrap!important;padding:10px 12px!important}
+    .dr-filters{flex-wrap:wrap!important;gap:6px!important}
+    .dr-summary-cards{grid-template-columns:repeat(2,1fr)!important;gap:8px!important}
+    .dr-item{flex-direction:column!important}
+    .dr-item-left{min-width:auto!important;width:100%!important}
     .week-grid{grid-template-columns:repeat(3,1fr)!important}
     .header{flex-wrap:wrap!important;padding:8px 12px!important;gap:6px!important}
     .header-left{width:100%!important;order:1!important}
@@ -580,6 +635,7 @@
       <button class="top-tab" data-page="captable" onclick="switchPage('captable')">Cap Table</button>
       <button class="top-tab" data-page="finance" onclick="switchPage('finance')">재무보고</button>
       <button class="top-tab" data-page="circle" onclick="switchPage('circle')">Inner Circle</button>
+      <button class="top-tab" data-page="report" onclick="switchPage('report')">Daily Report</button>
     </div>
   </div>
   <div class="top-nav-right" style="position:relative">
@@ -841,6 +897,78 @@
   </div>
 </div>
 
+<!-- ===== PAGE: Daily Report ===== -->
+<div class="page" id="page-report">
+  <div class="dr-container">
+    <div class="dr-header">
+      <div class="dr-header-left">
+        <h2 class="dr-title">Daily Report</h2>
+        <div class="dr-status" id="drStatus"><span class="dot" style="background:var(--text-dim)"></span>설정 필요</div>
+      </div>
+      <div class="dr-header-right">
+        <button class="btn" onclick="fetchDailyReports()" title="새로고침" style="font-size:14px">🔄</button>
+        <button class="btn" onclick="openDrSetup()">⚙️ 시트 연결</button>
+      </div>
+    </div>
+    <div class="dr-filters">
+      <div class="dr-date-nav">
+        <button onclick="drNavDate(-1)">‹</button>
+        <span class="dr-date-display" id="drDateDisplay" onclick="document.getElementById('drDateInput').showPicker()">2026-04-12</span>
+        <input type="date" id="drDateInput" style="position:absolute;opacity:0;pointer-events:none" onchange="drGoToDate(this.value)">
+        <button onclick="drNavDate(1)">›</button>
+        <button onclick="drGoToDate(dateKey(new Date()))" style="font-size:10px;width:auto;padding:0 8px">오늘</button>
+      </div>
+      <div class="dr-team-tabs">
+        <button class="dr-team-tab active" onclick="drSwitchTeam('all',this)">전체</button>
+        <button class="dr-team-tab" onclick="drSwitchTeam('strategy',this)">전략기획</button>
+        <button class="dr-team-tab" onclick="drSwitchTeam('operations',this)">사업운영</button>
+      </div>
+    </div>
+    <div class="dr-body" id="drBody">
+      <div class="dr-empty" id="drEmptyState">
+        <div class="dr-setup-guide">
+          <h3>📊 Google Sheets 연동 설정</h3>
+          <p style="font-size:12px;color:var(--text-dim);margin-bottom:14px">두 업무보고 시트를 웹에 게시하면 자동으로 데이터를 불러옵니다.</p>
+          <ol>
+            <li>각 Google Sheets 열기</li>
+            <li><strong>파일</strong> → <strong>공유</strong> → <strong>웹에 게시</strong></li>
+            <li>게시할 시트 탭 선택 → 형식: <code>CSV</code> → <strong>게시</strong> 클릭</li>
+            <li>생성된 URL을 복사해서 위의 <strong>⚙️ 시트 연결</strong>에 입력</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Daily Report Setup -->
+<div class="overlay" id="drSetupOverlay" onclick="if(event.target===this)closeDrSetup()">
+  <div class="setup-modal" style="width:500px">
+    <h2>📊 Daily Report 시트 연결</h2>
+    <p>각 시트를 "웹에 게시"한 후 CSV URL을 입력하세요.<br>또는 시트 ID와 GID를 직접 입력할 수도 있습니다.</p>
+    <h3>전략기획본부</h3>
+    <input id="drSheet1Url" placeholder="웹에 게시 CSV URL 또는 시트 ID (예: 1Ht94d2...)" />
+    <input id="drSheet1Gid" placeholder="GID (예: 1764795712)" />
+    <h3>사업운영본부</h3>
+    <input id="drSheet2Url" placeholder="웹에 게시 CSV URL 또는 시트 ID (예: 18CctaCl...)" />
+    <input id="drSheet2Gid" placeholder="GID (예: 1154214269)" />
+    <div class="setup-actions">
+      <button class="btn" style="background:var(--accent);color:#fff;border-color:var(--accent)" onclick="saveDrConfig()">저장 및 연결</button>
+      <button class="btn" onclick="closeDrSetup()">닫기</button>
+    </div>
+    <div class="setup-step" style="margin-top:12px">
+      <strong>Tip:</strong> 웹에 게시가 어렵다면, 시트 ID만 입력해도 됩니다.<br>
+      시트1: <code>1Ht94d2ALwGlLJtYiKnCsD9beKOXqVR_4GWUMW-U9v18</code><br>
+      시트2: <code>18CctaClFwjezRM7CfEjHBd5Qii3dUIJI</code>
+    </div>
+  </div>
+</div>
+
+<!-- Daily Report Detail -->
+<div class="dr-detail-overlay" id="drDetailOverlay" onclick="if(event.target===this)closeDrDetail()">
+  <div class="dr-detail-modal" id="drDetailModal"></div>
+</div>
+
 <!-- OVERLAYS -->
 <div class="overlay" id="historyOverlay" onclick="if(event.target===this)closeHistory()">
   <div class="panel"><div class="panel-title"><span>📋 Saved History</span><button class="btn" onclick="closeHistory()" style="padding:3px 9px">✕</button></div><div id="historyList"></div></div>
@@ -1081,7 +1209,7 @@ let notifications=[];
 
 // ===== INIT =====
 function init(){
-  loadLocalData();loadRecurringTasks();loadContacts();seedInitialData();initFirebase();initRecMonthDays();
+  loadLocalData();loadRecurringTasks();loadContacts();loadDrConfig();seedInitialData();initFirebase();initRecMonthDays();
   renderDateDisplay();buildTimeSlots();loadDayData();
   updateCurrentTimeIndicator();setInterval(updateCurrentTimeIndicator,60000);
   loadCalendarEmbed();loadEmailLinks();loadFeeds();loadDaouMail();fetchGcalEvents();loadSlackBriefing();initStockPanel();
@@ -1101,6 +1229,7 @@ function switchPage(p){
   document.querySelectorAll('.top-tab').forEach(b=>b.classList.toggle('active',b.dataset.page===p));
   document.querySelectorAll('.page').forEach(pg=>pg.classList.toggle('active',pg.id==='page-'+p));
   if(p==='circle')renderContactList();
+  if(p==='report'){loadDrConfig();if(drConfig&&(drConfig.sheet1Id||drConfig.sheet2Id))fetchDailyReports();}
 }
 
 // ===== RIGHT PANEL TABS =====
@@ -2038,6 +2167,256 @@ function importData(){document.getElementById('importInput').click();}
 function handleImport(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const imp=JSON.parse(ev.target.result),cnt=Object.keys(imp).length;if(confirm(`${cnt}일치 가져오기?`)){Object.assign(data,imp);saveLocalData();if(firebaseRef){ignoreNextFirebaseUpdate=true;firebaseRef.set(data);}if(currentView==='day')loadDayData();else if(currentView==='week')renderWeekView();else renderMonthView();showToast(`${cnt}일치 완료`);}}catch(err){showToast('JSON 오류');}};r.readAsText(f);e.target.value='';}
 function clearToday(){if(confirm(`${dateKey()} 삭제?`)){delete data[dateKey()];saveLocalData();if(firebaseRef){ignoreNextFirebaseUpdate=true;firebaseRef.set(data);}if(currentView==='day')loadDayData();showToast('삭제 완료');}}
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+// ===== DAILY REPORT =====
+const DR_CONFIG_KEY='dcc-dr-config';
+let drConfig=null,drData={strategy:[],operations:[]},drCurrentDate=dateKey(new Date()),drCurrentTeam='all';
+
+const DR_DEFAULT_CONFIG={sheet1Id:'1Ht94d2ALwGlLJtYiKnCsD9beKOXqVR_4GWUMW-U9v18',sheet1Gid:'1764795712',sheet2Id:'18CctaClFwjezRM7CfEjHBd5Qii3dUIJI',sheet2Gid:'1154214269'};
+function loadDrConfig(){try{drConfig=JSON.parse(localStorage.getItem(DR_CONFIG_KEY));if(!drConfig)drConfig={...DR_DEFAULT_CONFIG};}catch(e){drConfig={...DR_DEFAULT_CONFIG};}}
+function saveDrConfigData(cfg){drConfig=cfg;localStorage.setItem(DR_CONFIG_KEY,JSON.stringify(cfg));}
+
+function openDrSetup(){
+  loadDrConfig();
+  if(drConfig){
+    document.getElementById('drSheet1Url').value=drConfig.sheet1Id||'';
+    document.getElementById('drSheet1Gid').value=drConfig.sheet1Gid||'';
+    document.getElementById('drSheet2Url').value=drConfig.sheet2Id||'';
+    document.getElementById('drSheet2Gid').value=drConfig.sheet2Gid||'';
+  }
+  document.getElementById('drSetupOverlay').classList.add('active');
+}
+function closeDrSetup(){document.getElementById('drSetupOverlay').classList.remove('active');}
+
+function saveDrConfig(){
+  const s1=document.getElementById('drSheet1Url').value.trim();
+  const g1=document.getElementById('drSheet1Gid').value.trim()||'1764795712';
+  const s2=document.getElementById('drSheet2Url').value.trim();
+  const g2=document.getElementById('drSheet2Gid').value.trim()||'1154214269';
+  // Extract sheet ID from URL if full URL given
+  const extractId=u=>{const m=u.match(/\/d\/([a-zA-Z0-9_-]+)/);return m?m[1]:u;};
+  saveDrConfigData({sheet1Id:extractId(s1),sheet1Gid:g1,sheet2Id:extractId(s2),sheet2Gid:g2});
+  closeDrSetup();showToast('시트 설정 저장 완료');
+  fetchDailyReports();
+}
+
+function buildCsvUrl(sheetId,gid){
+  return`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&gid=${gid}`;
+}
+
+function parseCSV(text){
+  const rows=[];let current='',inQuotes=false,row=[],i=0;
+  while(i<text.length){
+    const c=text[i];
+    if(inQuotes){
+      if(c==='"'&&text[i+1]==='"'){current+='"';i+=2;continue;}
+      if(c==='"'){inQuotes=false;i++;continue;}
+      current+=c;i++;
+    }else{
+      if(c==='"'){inQuotes=true;i++;continue;}
+      if(c===','){row.push(current.trim());current='';i++;continue;}
+      if(c==='\n'||(c==='\r'&&text[i+1]==='\n')){row.push(current.trim());rows.push(row);row=[];current='';i+=(c==='\r'?2:1);continue;}
+      current+=c;i++;
+    }
+  }
+  if(current||row.length)row.push(current.trim());
+  if(row.length)rows.push(row);
+  return rows;
+}
+
+function normalizeDate(d){
+  // Handle formats like "2026-4-6(월)", "2026-04-07(화)", "2026-4-9(목)"
+  const m=d.match(/(\d{4})-?(\d{1,2})-?(\d{1,2})/);
+  if(!m)return null;
+  return`${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
+}
+
+function parseSheet1(csv){
+  // 전략기획본부: A=구분, B=상세, C+=날짜
+  const rows=parseCSV(csv);if(rows.length<2)return[];
+  const headers=rows[0];
+  const dateMap={};
+  for(let c=2;c<headers.length;c++){const nd=normalizeDate(headers[c]);if(nd)dateMap[c]=nd;}
+  const items=[];
+  let lastCategory='';
+  for(let r=1;r<rows.length;r++){
+    const row=rows[r];
+    if(row[0]&&row[0].trim())lastCategory=row[0].trim();
+    const detail=(row[1]||'').trim();
+    for(const[ci,date]of Object.entries(dateMap)){
+      const content=(row[parseInt(ci)]||'').trim();
+      if(content){
+        items.push({team:'전략기획본부',category:lastCategory,detail,writer:'',company:detail,content,date});
+      }
+    }
+  }
+  return items;
+}
+
+function parseSheet2(csv){
+  // 사업운영본부: A=구분, B=기업명, C=작성자, D+=날짜
+  const rows=parseCSV(csv);if(rows.length<2)return[];
+  const headers=rows[0];
+  const dateMap={};
+  for(let c=3;c<headers.length;c++){const nd=normalizeDate(headers[c]);if(nd)dateMap[c]=nd;}
+  const items=[];
+  let lastCategory='',lastCompany='';
+  for(let r=1;r<rows.length;r++){
+    const row=rows[r];
+    if(row[0]&&row[0].trim())lastCategory=row[0].trim();
+    if(row[1]&&row[1].trim())lastCompany=row[1].trim();
+    const writer=(row[2]||'').trim();
+    for(const[ci,date]of Object.entries(dateMap)){
+      const content=(row[parseInt(ci)]||'').trim();
+      if(content){
+        items.push({team:'사업운영본부',category:lastCategory,detail:'',writer,company:lastCompany,content,date});
+      }
+    }
+  }
+  return items;
+}
+
+async function fetchDailyReports(){
+  loadDrConfig();
+  if(!drConfig||(!drConfig.sheet1Id&&!drConfig.sheet2Id)){
+    document.getElementById('drStatus').innerHTML='<span class="dot" style="background:var(--danger)"></span>설정 필요';
+    renderDrBody();return;
+  }
+  document.getElementById('drStatus').innerHTML='<span class="dot" style="background:var(--accent3)"></span>로딩 중...';
+  drData={strategy:[],operations:[]};
+  const fetchSheet=async(id,gid)=>{
+    const url=buildCsvUrl(id,gid);
+    try{
+      const r=await fetch(url);
+      if(!r.ok)throw new Error(r.status);
+      return await r.text();
+    }catch(e){console.error('Sheet fetch error:',e);return null;}
+  };
+  const [csv1,csv2]=await Promise.all([
+    drConfig.sheet1Id?fetchSheet(drConfig.sheet1Id,drConfig.sheet1Gid):Promise.resolve(null),
+    drConfig.sheet2Id?fetchSheet(drConfig.sheet2Id,drConfig.sheet2Gid):Promise.resolve(null)
+  ]);
+  if(csv1)drData.strategy=parseSheet1(csv1);
+  if(csv2)drData.operations=parseSheet2(csv2);
+  const total=drData.strategy.length+drData.operations.length;
+  if(total>0){
+    document.getElementById('drStatus').innerHTML=`<span class="dot" style="background:var(--success)"></span>총 ${total}건 로드`;
+  }else{
+    document.getElementById('drStatus').innerHTML=`<span class="dot" style="background:var(--danger)"></span>데이터 없음 (웹에 게시 필요)`;
+  }
+  renderDrBody();
+}
+
+function drNavDate(delta){
+  const d=new Date(drCurrentDate);d.setDate(d.getDate()+delta);
+  drCurrentDate=dateKey(d);
+  document.getElementById('drDateDisplay').textContent=drCurrentDate;
+  renderDrBody();
+}
+function drGoToDate(ds){
+  if(!ds)return;drCurrentDate=ds;
+  document.getElementById('drDateDisplay').textContent=drCurrentDate;
+  renderDrBody();
+}
+function drSwitchTeam(team,el){
+  drCurrentTeam=team;
+  document.querySelectorAll('.dr-team-tab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderDrBody();
+}
+
+function renderDrBody(){
+  const body=document.getElementById('drBody');
+  const allItems=[...drData.strategy,...drData.operations].filter(i=>i.date===drCurrentDate);
+  const stratItems=allItems.filter(i=>i.team==='전략기획본부');
+  const opsItems=allItems.filter(i=>i.team==='사업운영본부');
+  const showStrat=drCurrentTeam==='all'||drCurrentTeam==='strategy';
+  const showOps=drCurrentTeam==='all'||drCurrentTeam==='operations';
+
+  if(!allItems.length&&!drData.strategy.length&&!drData.operations.length){
+    body.innerHTML=document.getElementById('drEmptyState')?document.getElementById('drEmptyState').outerHTML:'<div class="dr-empty">시트를 연결하세요.</div>';
+    return;
+  }
+  if(!allItems.length||(showStrat&&!stratItems.length&&!showOps)||(showOps&&!opsItems.length&&!showStrat)||(!showStrat&&!opsItems.length)||(!showOps&&!stratItems.length)){
+    const filtered=showStrat?stratItems:opsItems;
+    if(!filtered.length&&!allItems.length){
+      body.innerHTML=`<div class="dr-empty">${drCurrentDate}에 등록된 업무보고가 없습니다.</div>`;
+      return;
+    }
+  }
+
+  // Summary cards
+  let html=`<div class="dr-summary-cards">`;
+  if(showStrat) html+=`<div class="dr-summary-card"><div class="dr-summary-num" style="color:var(--accent)">${stratItems.length}</div><div class="dr-summary-label">전략기획본부</div></div>`;
+  if(showOps) html+=`<div class="dr-summary-card"><div class="dr-summary-num" style="color:var(--accent5)">${opsItems.length}</div><div class="dr-summary-label">사업운영본부</div></div>`;
+  html+=`<div class="dr-summary-card"><div class="dr-summary-num">${showStrat&&showOps?allItems.length:showStrat?stratItems.length:opsItems.length}</div><div class="dr-summary-label">전체 보고 건수</div></div>`;
+  const writers=new Set(allItems.filter(i=>(showStrat&&i.team==='전략기획본부')||(showOps&&i.team==='사업운영본부')).filter(i=>i.writer).map(i=>i.writer));
+  if(writers.size)html+=`<div class="dr-summary-card"><div class="dr-summary-num" style="color:var(--accent2)">${writers.size}</div><div class="dr-summary-label">보고자 수</div></div>`;
+  html+=`</div>`;
+
+  // Strategy section
+  if(showStrat&&stratItems.length){
+    html+=`<div class="dr-team-section"><div class="dr-team-title"><span class="team-dot" style="background:var(--accent)"></span>전략기획본부 <span style="font-size:10px;color:var(--text-dim);font-weight:400">${stratItems.length}건</span></div>`;
+    const cats={};stratItems.forEach(i=>{(cats[i.category]=cats[i.category]||[]).push(i);});
+    for(const[cat,items]of Object.entries(cats)){
+      html+=`<div class="dr-category"><div class="dr-cat-header"><span class="cat-tag">${escHtml(cat)}</span></div>`;
+      items.forEach((item,idx)=>{
+        const preview=item.content.length>100?item.content.slice(0,100)+'...':item.content;
+        html+=`<div class="dr-item" onclick="showDrDetail('strategy',${drData.strategy.indexOf(item)})">
+          <div class="dr-item-left"><div class="dr-item-company">${escHtml(item.company||cat)}</div></div>
+          <div class="dr-item-content">${escHtml(preview)}</div>
+        </div>`;
+      });
+      html+=`</div>`;
+    }
+    html+=`</div>`;
+  }
+
+  // Operations section
+  if(showOps&&opsItems.length){
+    html+=`<div class="dr-team-section"><div class="dr-team-title"><span class="team-dot" style="background:var(--accent5)"></span>사업운영본부 <span style="font-size:10px;color:var(--text-dim);font-weight:400">${opsItems.length}건</span></div>`;
+    const cats={};opsItems.forEach(i=>{(cats[i.category]=cats[i.category]||[]).push(i);});
+    for(const[cat,items]of Object.entries(cats)){
+      html+=`<div class="dr-category"><div class="dr-cat-header"><span class="cat-tag">${escHtml(cat)}</span></div>`;
+      items.forEach(item=>{
+        const preview=item.content.length>100?item.content.slice(0,100)+'...':item.content;
+        html+=`<div class="dr-item" onclick="showDrDetail('operations',${drData.operations.indexOf(item)})">
+          <div class="dr-item-left"><div class="dr-item-company">${escHtml(item.company)}</div>${item.writer?`<div class="dr-item-writer">${escHtml(item.writer)}</div>`:''}</div>
+          <div class="dr-item-content">${escHtml(preview)}</div>
+        </div>`;
+      });
+      html+=`</div>`;
+    }
+    html+=`</div>`;
+  }
+
+  if(!html.includes('dr-team-section')){
+    html+=`<div class="dr-empty">${drCurrentDate}에 등록된 업무보고가 없습니다.</div>`;
+  }
+
+  body.innerHTML=html;
+}
+
+function showDrDetail(team,idx){
+  const item=team==='strategy'?drData.strategy[idx]:drData.operations[idx];
+  if(!item)return;
+  const sheetUrl=team==='strategy'
+    ?`https://docs.google.com/spreadsheets/d/${drConfig.sheet1Id}/edit?gid=${drConfig.sheet1Gid}`
+    :`https://docs.google.com/spreadsheets/d/${drConfig.sheet2Id}/edit?gid=${drConfig.sheet2Gid}`;
+  document.getElementById('drDetailModal').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+      <div>
+        <div class="dr-detail-title">${escHtml(item.company||item.category)}</div>
+        <div class="dr-detail-meta">${escHtml(item.team)} · ${escHtml(item.category)}${item.writer?' · '+escHtml(item.writer):''} · ${item.date}</div>
+      </div>
+      <button class="btn" onclick="closeDrDetail()" style="flex-shrink:0">✕</button>
+    </div>
+    <div class="dr-detail-content">${escHtml(item.content)}</div>
+    <a href="${sheetUrl}" target="_blank" class="dr-original-link">📄 원본 시트 열기 →</a>
+  `;
+  document.getElementById('drDetailOverlay').classList.add('active');
+}
+function closeDrDetail(){document.getElementById('drDetailOverlay').classList.remove('active');}
 
 // ===== INNER CIRCLE =====
 const IC_KEY='dcc-inner-circle';
