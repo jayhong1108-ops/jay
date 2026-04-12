@@ -928,12 +928,12 @@
       <div class="dr-empty" id="drEmptyState">
         <div class="dr-setup-guide">
           <h3>📊 Google Sheets 연동 설정</h3>
-          <p style="font-size:12px;color:var(--text-dim);margin-bottom:14px">두 업무보고 시트를 웹에 게시하면 자동으로 데이터를 불러옵니다.</p>
+          <p style="font-size:12px;color:var(--text-dim);margin-bottom:14px">Google API Key로 시트 데이터를 실시간 연동합니다.</p>
           <ol>
-            <li>각 Google Sheets 열기</li>
-            <li><strong>파일</strong> → <strong>공유</strong> → <strong>웹에 게시</strong></li>
-            <li>게시할 시트 탭 선택 → 형식: <code>CSV</code> → <strong>게시</strong> 클릭</li>
-            <li>생성된 URL을 복사해서 위의 <strong>⚙️ 시트 연결</strong>에 입력</li>
+            <li><a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color:var(--accent)">Google Cloud Console</a> → API Key 생성</li>
+            <li>API Key 제한: <strong>Google Sheets API</strong>만 허용 (권장)</li>
+            <li>각 Google Sheets → <strong>공유</strong> → <strong>링크가 있는 모든 사용자</strong>로 설정</li>
+            <li>위의 <strong>⚙️ 시트 연결</strong>에서 API Key와 시트 정보 입력</li>
           </ol>
         </div>
       </div>
@@ -943,23 +943,23 @@
 
 <!-- Daily Report Setup -->
 <div class="overlay" id="drSetupOverlay" onclick="if(event.target===this)closeDrSetup()">
-  <div class="setup-modal" style="width:500px">
+  <div class="setup-modal" style="width:520px">
     <h2>📊 Daily Report 시트 연결</h2>
-    <p>각 시트를 "웹에 게시"한 후 CSV URL을 입력하세요.<br>또는 시트 ID와 GID를 직접 입력할 수도 있습니다.</p>
+    <p style="margin-bottom:12px">Google Sheets API로 실시간 데이터를 가져옵니다.<br>시트를 <strong>"링크가 있는 모든 사용자"</strong>로 공유해주세요.</p>
+    <h3>🔑 Google API Key</h3>
+    <input id="drApiKey" placeholder="AIzaSy... (Google Cloud Console에서 발급)" style="font-family:monospace;font-size:11px" />
+    <p style="font-size:10px;color:var(--text-dim);margin:-6px 0 10px"><a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color:var(--accent)">API Key 발급 →</a> Google Sheets API 활성화 필요</p>
     <h3>전략기획본부</h3>
-    <input id="drSheet1Url" placeholder="웹에 게시 CSV URL 또는 시트 ID (예: 1Ht94d2...)" />
-    <input id="drSheet1Gid" placeholder="GID (예: 1764795712)" />
+    <input id="drSheet1Url" placeholder="시트 ID (예: 1Ht94d2ALwGlLJtYiKnCsD9beKOXqVR_4GWUMW-U9v18)" />
+    <input id="drSheet1Tab" placeholder="시트 탭 이름 (예: 시트1)" style="margin-top:4px" />
+    <p style="font-size:10px;color:var(--text-dim);margin:-6px 0 10px">탭 이름이 비어있으면 첫 번째 시트를 자동으로 불러옵니다</p>
     <h3>사업운영본부</h3>
-    <input id="drSheet2Url" placeholder="웹에 게시 CSV URL 또는 시트 ID (예: 18CctaCl...)" />
-    <input id="drSheet2Gid" placeholder="GID (예: 1154214269)" />
+    <input id="drSheet2Url" placeholder="시트 ID (예: 18CctaClFwjezRM7CfEjHBd5Qii3dUIJI)" />
+    <input id="drSheet2Tab" placeholder="시트 탭 이름 (예: 시트1)" style="margin-top:4px" />
     <div class="setup-actions">
       <button class="btn" style="background:var(--accent);color:#fff;border-color:var(--accent)" onclick="saveDrConfig()">저장 및 연결</button>
+      <button class="btn" onclick="drAutoDetectTabs()" title="시트 탭 이름 자동감지">🔍 탭 자동감지</button>
       <button class="btn" onclick="closeDrSetup()">닫기</button>
-    </div>
-    <div class="setup-step" style="margin-top:12px">
-      <strong>Tip:</strong> 웹에 게시가 어렵다면, 시트 ID만 입력해도 됩니다.<br>
-      시트1: <code>1Ht94d2ALwGlLJtYiKnCsD9beKOXqVR_4GWUMW-U9v18</code><br>
-      시트2: <code>18CctaClFwjezRM7CfEjHBd5Qii3dUIJI</code>
     </div>
   </div>
 </div>
@@ -2172,75 +2172,91 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
 const DR_CONFIG_KEY='dcc-dr-config';
 let drConfig=null,drData={strategy:[],operations:[]},drCurrentDate=dateKey(new Date()),drCurrentTeam='all';
 
-const DR_DEFAULT_CONFIG={sheet1Id:'1Ht94d2ALwGlLJtYiKnCsD9beKOXqVR_4GWUMW-U9v18',sheet1Gid:'1764795712',sheet2Id:'18CctaClFwjezRM7CfEjHBd5Qii3dUIJI',sheet2Gid:'1154214269'};
+const DR_DEFAULT_CONFIG={sheet1Id:'1Ht94d2ALwGlLJtYiKnCsD9beKOXqVR_4GWUMW-U9v18',sheet1Tab:'',sheet2Id:'18CctaClFwjezRM7CfEjHBd5Qii3dUIJI',sheet2Tab:'',apiKey:''};
 function loadDrConfig(){try{drConfig=JSON.parse(localStorage.getItem(DR_CONFIG_KEY));if(!drConfig)drConfig={...DR_DEFAULT_CONFIG};}catch(e){drConfig={...DR_DEFAULT_CONFIG};}}
 function saveDrConfigData(cfg){drConfig=cfg;localStorage.setItem(DR_CONFIG_KEY,JSON.stringify(cfg));}
 
 function openDrSetup(){
   loadDrConfig();
   if(drConfig){
+    document.getElementById('drApiKey').value=drConfig.apiKey||'';
     document.getElementById('drSheet1Url').value=drConfig.sheet1Id||'';
-    document.getElementById('drSheet1Gid').value=drConfig.sheet1Gid||'';
+    document.getElementById('drSheet1Tab').value=drConfig.sheet1Tab||'';
     document.getElementById('drSheet2Url').value=drConfig.sheet2Id||'';
-    document.getElementById('drSheet2Gid').value=drConfig.sheet2Gid||'';
+    document.getElementById('drSheet2Tab').value=drConfig.sheet2Tab||'';
   }
   document.getElementById('drSetupOverlay').classList.add('active');
 }
 function closeDrSetup(){document.getElementById('drSetupOverlay').classList.remove('active');}
 
 function saveDrConfig(){
+  const apiKey=document.getElementById('drApiKey').value.trim();
   const s1=document.getElementById('drSheet1Url').value.trim();
-  const g1=document.getElementById('drSheet1Gid').value.trim()||'1764795712';
+  const t1=document.getElementById('drSheet1Tab').value.trim();
   const s2=document.getElementById('drSheet2Url').value.trim();
-  const g2=document.getElementById('drSheet2Gid').value.trim()||'1154214269';
-  // Extract sheet ID from URL if full URL given
+  const t2=document.getElementById('drSheet2Tab').value.trim();
   const extractId=u=>{const m=u.match(/\/d\/([a-zA-Z0-9_-]+)/);return m?m[1]:u;};
-  saveDrConfigData({sheet1Id:extractId(s1),sheet1Gid:g1,sheet2Id:extractId(s2),sheet2Gid:g2});
+  saveDrConfigData({apiKey,sheet1Id:extractId(s1),sheet1Tab:t1,sheet2Id:extractId(s2),sheet2Tab:t2});
   closeDrSetup();showToast('시트 설정 저장 완료');
   fetchDailyReports();
 }
 
-function buildCsvUrl(sheetId,gid){
-  return`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&gid=${gid}`;
-}
-
-function parseCSV(text){
-  const rows=[];let current='',inQuotes=false,row=[],i=0;
-  while(i<text.length){
-    const c=text[i];
-    if(inQuotes){
-      if(c==='"'&&text[i+1]==='"'){current+='"';i+=2;continue;}
-      if(c==='"'){inQuotes=false;i++;continue;}
-      current+=c;i++;
-    }else{
-      if(c==='"'){inQuotes=true;i++;continue;}
-      if(c===','){row.push(current.trim());current='';i++;continue;}
-      if(c==='\n'||(c==='\r'&&text[i+1]==='\n')){row.push(current.trim());rows.push(row);row=[];current='';i+=(c==='\r'?2:1);continue;}
-      current+=c;i++;
-    }
-  }
-  if(current||row.length)row.push(current.trim());
-  if(row.length)rows.push(row);
-  return rows;
+async function drAutoDetectTabs(){
+  const apiKey=document.getElementById('drApiKey').value.trim();
+  if(!apiKey){showToast('API Key를 먼저 입력하세요','error');return;}
+  const s1=document.getElementById('drSheet1Url').value.trim();
+  const s2=document.getElementById('drSheet2Url').value.trim();
+  const extractId=u=>{const m=u.match(/\/d\/([a-zA-Z0-9_-]+)/);return m?m[1]:u;};
+  const detect=async(id,inputEl)=>{
+    if(!id)return;
+    try{
+      const r=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${extractId(id)}?key=${apiKey}&fields=sheets.properties`);
+      if(!r.ok)throw new Error(r.status);
+      const d=await r.json();
+      const names=(d.sheets||[]).map(s=>s.properties.title);
+      if(names.length)inputEl.value=names[0];
+      showToast(`탭 감지: ${names.join(', ')}`);
+    }catch(e){showToast(`감지 실패: ${e.message}`,'error');}
+  };
+  await Promise.all([
+    detect(s1,document.getElementById('drSheet1Tab')),
+    detect(s2,document.getElementById('drSheet2Tab'))
+  ]);
 }
 
 function normalizeDate(d){
-  // Handle formats like "2026-4-6(월)", "2026-04-07(화)", "2026-4-9(목)"
+  if(!d)return null;
   const m=d.match(/(\d{4})-?(\d{1,2})-?(\d{1,2})/);
   if(!m)return null;
   return`${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
 }
 
-function parseSheet1(csv){
+async function fetchSheetViaApi(sheetId,tabName,apiKey){
+  const range=tabName?encodeURIComponent(tabName):'';
+  const url=range
+    ?`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?key=${apiKey}`
+    :`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values:batchGet?ranges=Sheet1&key=${apiKey}`;
+  try{
+    const r=await fetch(url);
+    if(!r.ok){
+      const err=await r.json().catch(()=>({}));
+      throw new Error(err.error?.message||r.status);
+    }
+    const d=await r.json();
+    return d.values||d.valueRanges?.[0]?.values||[];
+  }catch(e){console.error('Sheets API error:',e);throw e;}
+}
+
+function parseSheet1Rows(rows){
   // 전략기획본부: A=구분, B=상세, C+=날짜
-  const rows=parseCSV(csv);if(rows.length<2)return[];
+  if(rows.length<2)return[];
   const headers=rows[0];
   const dateMap={};
   for(let c=2;c<headers.length;c++){const nd=normalizeDate(headers[c]);if(nd)dateMap[c]=nd;}
   const items=[];
   let lastCategory='';
   for(let r=1;r<rows.length;r++){
-    const row=rows[r];
+    const row=rows[r]||[];
     if(row[0]&&row[0].trim())lastCategory=row[0].trim();
     const detail=(row[1]||'').trim();
     for(const[ci,date]of Object.entries(dateMap)){
@@ -2253,16 +2269,16 @@ function parseSheet1(csv){
   return items;
 }
 
-function parseSheet2(csv){
+function parseSheet2Rows(rows){
   // 사업운영본부: A=구분, B=기업명, C=작성자, D+=날짜
-  const rows=parseCSV(csv);if(rows.length<2)return[];
+  if(rows.length<2)return[];
   const headers=rows[0];
   const dateMap={};
   for(let c=3;c<headers.length;c++){const nd=normalizeDate(headers[c]);if(nd)dateMap[c]=nd;}
   const items=[];
   let lastCategory='',lastCompany='';
   for(let r=1;r<rows.length;r++){
-    const row=rows[r];
+    const row=rows[r]||[];
     if(row[0]&&row[0].trim())lastCategory=row[0].trim();
     if(row[1]&&row[1].trim())lastCompany=row[1].trim();
     const writer=(row[2]||'').trim();
@@ -2278,31 +2294,32 @@ function parseSheet2(csv){
 
 async function fetchDailyReports(){
   loadDrConfig();
-  if(!drConfig||(!drConfig.sheet1Id&&!drConfig.sheet2Id)){
-    document.getElementById('drStatus').innerHTML='<span class="dot" style="background:var(--danger)"></span>설정 필요';
+  if(!drConfig||!drConfig.apiKey){
+    document.getElementById('drStatus').innerHTML='<span class="dot" style="background:var(--danger)"></span>API Key 필요';
+    renderDrBody();return;
+  }
+  if(!drConfig.sheet1Id&&!drConfig.sheet2Id){
+    document.getElementById('drStatus').innerHTML='<span class="dot" style="background:var(--danger)"></span>시트 설정 필요';
     renderDrBody();return;
   }
   document.getElementById('drStatus').innerHTML='<span class="dot" style="background:var(--accent3)"></span>로딩 중...';
   drData={strategy:[],operations:[]};
-  const fetchSheet=async(id,gid)=>{
-    const url=buildCsvUrl(id,gid);
-    try{
-      const r=await fetch(url);
-      if(!r.ok)throw new Error(r.status);
-      return await r.text();
-    }catch(e){console.error('Sheet fetch error:',e);return null;}
-  };
-  const [csv1,csv2]=await Promise.all([
-    drConfig.sheet1Id?fetchSheet(drConfig.sheet1Id,drConfig.sheet1Gid):Promise.resolve(null),
-    drConfig.sheet2Id?fetchSheet(drConfig.sheet2Id,drConfig.sheet2Gid):Promise.resolve(null)
+  let errors=[];
+  const [rows1,rows2]=await Promise.allSettled([
+    drConfig.sheet1Id?fetchSheetViaApi(drConfig.sheet1Id,drConfig.sheet1Tab,drConfig.apiKey):Promise.resolve([]),
+    drConfig.sheet2Id?fetchSheetViaApi(drConfig.sheet2Id,drConfig.sheet2Tab,drConfig.apiKey):Promise.resolve([])
   ]);
-  if(csv1)drData.strategy=parseSheet1(csv1);
-  if(csv2)drData.operations=parseSheet2(csv2);
+  if(rows1.status==='fulfilled'&&rows1.value.length)drData.strategy=parseSheet1Rows(rows1.value);
+  else if(rows1.status==='rejected')errors.push('전략기획: '+rows1.reason.message);
+  if(rows2.status==='fulfilled'&&rows2.value.length)drData.operations=parseSheet2Rows(rows2.value);
+  else if(rows2.status==='rejected')errors.push('사업운영: '+rows2.reason.message);
   const total=drData.strategy.length+drData.operations.length;
-  if(total>0){
+  if(errors.length){
+    document.getElementById('drStatus').innerHTML=`<span class="dot" style="background:var(--danger)"></span>${escHtml(errors[0])}`;
+  }else if(total>0){
     document.getElementById('drStatus').innerHTML=`<span class="dot" style="background:var(--success)"></span>총 ${total}건 로드`;
   }else{
-    document.getElementById('drStatus').innerHTML=`<span class="dot" style="background:var(--danger)"></span>데이터 없음 (웹에 게시 필요)`;
+    document.getElementById('drStatus').innerHTML=`<span class="dot" style="background:var(--warning)"></span>데이터 없음`;
   }
   renderDrBody();
 }
