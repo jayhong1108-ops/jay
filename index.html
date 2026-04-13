@@ -314,9 +314,9 @@
     </div>
     <div class="center-area">
       <div class="task-grid">
-        <div class="card"><div class="card-header"><div class="card-title"><span style="color:var(--accent)">●</span> Business Tasks <span class="card-badge" style="background:rgba(74,158,255,.12);color:var(--accent)" id="bizCount">0</span></div><button class="card-add" onclick="addTask('business')">+</button></div><div class="card-body" id="businessList"></div></div>
-        <div class="card"><div class="card-header"><div class="card-title"><span style="color:var(--accent2)">●</span> Personal Tasks <span class="card-badge" style="background:rgba(168,85,247,.12);color:var(--accent2)" id="personalCount">0</span></div><button class="card-add" onclick="addTask('personal')">+</button></div><div class="card-body" id="personalList"></div></div>
-        <div class="card"><div class="card-header"><div class="card-title"><span style="color:var(--accent3)">●</span> In Progress <span class="card-badge" style="background:rgba(245,158,11,.12);color:var(--accent3)" id="progressCount">0</span></div><button class="card-add" onclick="addTask('progress')">+</button></div><div class="card-body" id="progressList"></div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><span style="color:var(--accent)">●</span> Business Tasks <span class="card-badge" style="background:rgba(74,158,255,.12);color:var(--accent)" id="bizCount">0</span></div><div style="display:flex;gap:3px"><button class="card-add" onclick="openRecurring('business')" title="반복 태스크">↻</button><button class="card-add" onclick="addTask('business')">+</button></div></div><div class="card-body" id="businessList"></div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><span style="color:var(--accent2)">●</span> Personal Tasks <span class="card-badge" style="background:rgba(168,85,247,.12);color:var(--accent2)" id="personalCount">0</span></div><div style="display:flex;gap:3px"><button class="card-add" onclick="openRecurring('personal')" title="반복 태스크">↻</button><button class="card-add" onclick="addTask('personal')">+</button></div></div><div class="card-body" id="personalList"></div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><span style="color:var(--accent3)">●</span> In Progress <span class="card-badge" style="background:rgba(245,158,11,.12);color:var(--accent3)" id="progressCount">0</span></div><div style="display:flex;gap:3px"><button class="card-add" onclick="openRecurring('progress')" title="반복 태스크">↻</button><button class="card-add" onclick="addTask('progress')">+</button></div></div><div class="card-body" id="progressList"></div></div>
         <div class="card"><div class="card-header"><div class="card-title"><span style="color:var(--accent4)">●</span> Directives <span class="card-badge" style="background:rgba(236,72,153,.12);color:var(--accent4)" id="directiveCount">0</span></div><button class="card-add" onclick="addDirective()">+</button></div><div class="card-body" id="directiveList"></div></div>
       </div>
     </div>
@@ -326,6 +326,7 @@
         <button class="right-tab active" onclick="switchRightTab('memo')">Memo</button>
         <button class="right-tab" onclick="switchRightTab('calendar')">Calendar</button>
         <button class="right-tab" onclick="switchRightTab('feed')">Feed</button>
+        <button class="right-tab" onclick="switchRightTab('slack')">Slack</button>
       </div>
       <div class="right-panel active" id="panelMemo">
         <div style="padding:6px 14px;font-size:10px;color:var(--text-dim);text-align:right;border-bottom:1px solid var(--border)" id="memoCharCount">0자</div>
@@ -361,6 +362,29 @@
           <a href="https://outstanding.kr" target="_blank" class="feed-link-btn">📰 아웃스탠딩 열기</a>
           <a href="https://www.linkedin.com/feed/" target="_blank" class="feed-link-btn">💼 LinkedIn 열기</a>
           <div id="feedList"><div class="feed-empty">피드 로딩 중...</div></div>
+        </div>
+      </div>
+      <div class="right-panel" id="panelSlack">
+        <div class="feed-section">
+          <div class="feed-section-title">💬 Slack Workspace</div>
+          <a href="https://app.slack.com/client" target="_blank" class="feed-link-btn">💬 Slack 열기</a>
+          <a href="https://app.slack.com/client/threads" target="_blank" class="feed-link-btn">🧵 스레드</a>
+          <a href="https://app.slack.com/client/unreads" target="_blank" class="feed-link-btn">🔔 읽지 않은 메시지</a>
+          <a href="https://app.slack.com/client/activity" target="_blank" class="feed-link-btn">📊 활동</a>
+        </div>
+        <div class="feed-section">
+          <div class="feed-section-title">📌 즐겨찾기 채널</div>
+          <div id="slackFavChannels" style="display:flex;flex-direction:column;gap:4px;padding:4px 0">
+            <div class="feed-empty" style="font-size:11px;color:var(--text-dim)">아래 설정에서 채널을 등록하세요</div>
+          </div>
+        </div>
+        <div class="feed-section">
+          <div class="feed-section-title">⚙️ 채널 설정</div>
+          <div style="padding:4px 0">
+            <div style="display:flex;gap:4px"><input id="slackChInput" placeholder="채널명 (예: general)" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:4px;font-size:11px"><button class="btn" onclick="addSlackChannel()" style="padding:3px 8px;font-size:11px">추가</button></div>
+            <div style="display:flex;gap:4px;margin-top:4px"><input id="slackWsInput" placeholder="워크스페이스 ID (예: T01ABCDEF)" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:4px;font-size:11px"><button class="btn" onclick="saveSlackWs()" style="padding:3px 8px;font-size:11px">저장</button></div>
+            <div style="font-size:10px;color:var(--text-dim);margin-top:4px">워크스페이스 ID: Slack URL의 /client/T01ABCDEF 부분</div>
+          </div>
         </div>
       </div>
     </div>
@@ -455,6 +479,46 @@
     </div>
   </div>
 </div>
+<div class="overlay" id="recurringOverlay" onclick="if(event.target===this)closeRecurring()">
+  <div class="setup-modal" style="max-width:420px">
+    <h2>↻ 반복 태스크 관리</h2>
+    <p id="recurringSection" style="font-size:12px;color:var(--text-dim);margin-bottom:8px">business</p>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <input id="recurTaskText" placeholder="반복할 태스크 내용" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:12px">
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <label style="font-size:11px;color:var(--text-dim)">반복:</label>
+        <select id="recurFreq" onchange="toggleRecurDays()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:4px;font-size:11px">
+          <option value="daily">매일</option>
+          <option value="weekdays">평일 (월~금)</option>
+          <option value="weekly">매주</option>
+          <option value="custom">요일 선택</option>
+        </select>
+        <select id="recurPriority" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:4px;font-size:11px">
+          <option value="mid">!! 보통</option>
+          <option value="high">!!! 높음</option>
+          <option value="low">! 낮음</option>
+        </select>
+      </div>
+      <div id="recurDaysWrap" style="display:none;gap:4px;flex-wrap:wrap">
+        <label style="font-size:11px;cursor:pointer"><input type="checkbox" value="1" class="recur-day-cb"> 월</label>
+        <label style="font-size:11px;cursor:pointer"><input type="checkbox" value="2" class="recur-day-cb"> 화</label>
+        <label style="font-size:11px;cursor:pointer"><input type="checkbox" value="3" class="recur-day-cb"> 수</label>
+        <label style="font-size:11px;cursor:pointer"><input type="checkbox" value="4" class="recur-day-cb"> 목</label>
+        <label style="font-size:11px;cursor:pointer"><input type="checkbox" value="5" class="recur-day-cb"> 금</label>
+        <label style="font-size:11px;cursor:pointer"><input type="checkbox" value="6" class="recur-day-cb"> 토</label>
+        <label style="font-size:11px;cursor:pointer"><input type="checkbox" value="0" class="recur-day-cb"> 일</label>
+      </div>
+    </div>
+    <div class="setup-actions" style="margin-top:10px">
+      <button class="btn" style="background:var(--accent5);color:#fff;border-color:var(--accent5)" onclick="saveRecurringTask()">등록</button>
+      <button class="btn" onclick="closeRecurring()">닫기</button>
+    </div>
+    <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
+      <div style="font-size:11px;font-weight:700;color:var(--text-dim);margin-bottom:6px">등록된 반복 태스크</div>
+      <div id="recurringList" style="display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto"></div>
+    </div>
+  </div>
+</div>
 <input type="file" id="importInput" accept=".json" style="display:none" onchange="handleImport(event)">
 <div class="toast" id="toast"></div>
 
@@ -491,6 +555,7 @@ function init(){
   renderDateDisplay();buildTimeSlots();loadDayData();
   updateCurrentTimeIndicator();setInterval(updateCurrentTimeIndicator,60000);
   loadCalendarEmbed();loadEmailLinks();loadFeeds();loadDaouMail();fetchGcalEvents();
+  renderSlackChannels();applyRecurringTasks();
   requestNotificationPermission();
   // 30초마다 자동저장 (안전망)
   setInterval(()=>{if(currentView==='day'&&currentPage==='dashboard')saveDayData();},30000);
@@ -739,7 +804,7 @@ function initFirebase(){
       if(_lastPushedKey===key){_lastPushedKey=null;return;}
       if(val){data[key]=val;saveLocalData();
         if(currentPage==='dashboard'){
-          if(currentView==='day'&&dateKey()===key)loadDayData();
+          if(currentView==='day'&&dateKey()===key){loadDayData();fetchGcalEvents();}
           else if(currentView==='week')renderWeekView();
           else if(currentView==='month')renderMonthView();
         }
@@ -771,12 +836,13 @@ function initFirebase(){
     firebaseRef.once('value',s=>{
       const d=s.val();if(d){
         Object.keys(d).forEach(key=>{
+          if(key==='_recurringTasks'){localStorage.setItem(RECUR_KEY,JSON.stringify(d[key]));return;}
           if(!data[key]||new Date(d[key].lastModified||0)>new Date((data[key]||{}).lastModified||0)){
             data[key]=d[key];
           }
         });
         saveLocalData();
-        if(currentView==='day'&&currentPage==='dashboard')loadDayData();
+        if(currentView==='day'&&currentPage==='dashboard'){loadDayData();fetchGcalEvents();}
         else if(currentView==='week')renderWeekView();
         else if(currentView==='month')renderMonthView();
       }
@@ -875,7 +941,7 @@ function loadDayData(){
     if(dayData.directives){const l=document.getElementById('directiveList');dayData.directives.forEach(d=>l.appendChild(createDirectiveItem(d)));}
     document.getElementById('memoArea').value=dayData.memo||'';
   }else{document.getElementById('memoArea').value='';}
-  document.getElementById('memoCharCount').textContent=document.getElementById('memoArea').value.length+'자';updateCounts();updateCurrentTimeIndicator();
+  document.getElementById('memoCharCount').textContent=document.getElementById('memoArea').value.length+'자';updateCounts();updateCurrentTimeIndicator();applyRecurringTasks();
 }
 
 // ===== WEEK VIEW =====
@@ -901,6 +967,33 @@ function seedInitialData(){
   data['2026-03-26']={tasks:{business:[{text:'중국어 IR 자료작성',done:true,priority:'high',carried:false},{text:'중국과 미팅할 투자사 2개 선정 - 미래에셋캐피탈에 리스트 전달',done:true,priority:'high',carried:false},{text:'놉스 매출입금 확인 : 1월6일 입금 / 2월20일 입금 왜 달마다 다른지 체크',done:true,priority:'mid',carried:false},{text:'이상윤이사 푸디버스 직급확인',done:true,priority:'low',carried:false},{text:'웰컴벤처스 투자일정 체크',done:true,priority:'mid',carried:false},{text:'더존 이상철본부장 안부인사',done:true,priority:'low',carried:false},{text:'시리즈B 시나리오 체크 - 4월 휴가 후 시작',done:false,priority:'high',carried:false},{text:'전략기획 인원 채용공고 필요한지 체크',done:true,priority:'mid',carried:false},{text:'고구려푸드 계약내용 및 일정확인',done:true,priority:'high',carried:false},{text:'권종철대표 의사확인',done:true,priority:'mid',carried:false},{text:'재도전패키지 보완서류 제출 확인',done:true,priority:'mid',carried:false},{text:'슬림 코칭 설문작성',done:true,priority:'low',carried:false},{text:'미래에셋 중국투자사 약속잡기',done:true,priority:'high',carried:false},{text:'스포츠서울 웰니스 포럼 - 행복날개수련원 30분 발표',done:true,priority:'mid',carried:false},{text:'클라이피 대시보드 변경체크 - 김윤수',done:false,priority:'mid',carried:false},{text:'이승휘전무 연락 - 4월내 투심위 및 납입',done:true,priority:'high',carried:false},{text:'4월 2주차 삼화 주총후 최시원대표 저녁약속',done:false,priority:'mid',carried:false},{text:'재도전 지원사업 발표 - 25일 4시40분',done:false,priority:'high',carried:false},{text:'피부과 소개자료 송부',done:true,priority:'mid',carried:false},{text:'이상철전무님 미팅 - 더존 비지니스 논의',done:true,priority:'high',carried:false},{text:'어머니 급여확인',done:true,priority:'mid',carried:false},{text:'법무법인 현 소송 전략미팅',done:false,priority:'high',carried:false},{text:'키오스크 중국회사 출장중 미팅',done:false,priority:'mid',carried:false}],personal:[{text:'하와이 차 렌트 및 골프장 예약',done:true,priority:'mid',carried:false},{text:'아버지 생신 저녁일정 체크 - 25일로 결정',done:true,priority:'high',carried:false}],progress:[{text:'시리즈B 시나리오 체크 - 4월 휴가 후 시작',done:false,priority:'high',carried:false},{text:'연세대 산학협력단 기술이전 논의',done:false,priority:'high',carried:false},{text:'중국진출 프로세스 - 호심정과 투자프로세스',done:true,priority:'high',carried:false},{text:'고구려푸드 인수 - 24일 계약서 날인',done:false,priority:'high',carried:false}]},directives:[{text:'중국어 IR자료작성',assignee:'김윤수',status:'done',carried:false},{text:'엔크레더블 주식계약',assignee:'배동준',status:'done',carried:false},{text:'고구려푸드 인수계약서 검토',assignee:'배동준',status:'done',carried:false},{text:'현대건설 이노베이션 지원 - 4월초',assignee:'김윤수',status:'pending',carried:false},{text:'피부과 소개자료 송부',assignee:'',status:'pending',carried:false},{text:'FAV 임직원 사용 독려방안 - 4월7일',assignee:'',status:'pending',carried:false}],schedule:{'09:00':'📅 [푸디/경덕] 푸드앤리빙, 창고, 투웰브 (09:15~17:15)','11:00':'📅 중국어강사 면접','14:00':'📅 [푸디] 검품 - 강동2 (14:00~18:00)','16:00':'📅 [박진] 도화 방문미팅','16:30':'📅 [Clify] 전략기획본부 면접','17:00':'📅 바디빈 (서초구 방배동)','18:00':'📅 홍가종친회'},memo:'3월 Check List\n\n핵심 포커스:\n- 고구려푸드 인수 마무리\n- 시리즈B 4월 준비\n- 중국 투자 프로세스 (호심정)\n- 재도전 지원사업 발표',lastModified:new Date().toISOString()};
   saveLocalData();if(firebaseRef){Object.keys(data).forEach(k=>{firebaseRef.child(k).set(data[k]);});}
 }
+
+// ===== SLACK CHANNELS =====
+const SLACK_CH_KEY='dcc-slack-channels',SLACK_WS_KEY='dcc-slack-ws';
+function getSlackChannels(){try{return JSON.parse(localStorage.getItem(SLACK_CH_KEY))||[];}catch(e){return[];}}
+function getSlackWs(){return localStorage.getItem(SLACK_WS_KEY)||'';}
+function saveSlackWs(){const v=document.getElementById('slackWsInput').value.trim();if(v){localStorage.setItem(SLACK_WS_KEY,v);renderSlackChannels();showToast('워크스페이스 ID 저장됨');}else{showToast('워크스페이스 ID를 입력하세요');}}
+function addSlackChannel(){const inp=document.getElementById('slackChInput'),name=inp.value.trim();if(!name){showToast('채널명을 입력하세요');return;}const chs=getSlackChannels();if(chs.find(c=>c.name===name)){showToast('이미 등록된 채널');return;}chs.push({name});localStorage.setItem(SLACK_CH_KEY,JSON.stringify(chs));inp.value='';renderSlackChannels();showToast(`#${name} 추가됨`);}
+function removeSlackChannel(name){let chs=getSlackChannels();chs=chs.filter(c=>c.name!==name);localStorage.setItem(SLACK_CH_KEY,JSON.stringify(chs));renderSlackChannels();}
+function renderSlackChannels(){const chs=getSlackChannels(),ws=getSlackWs(),el=document.getElementById('slackFavChannels');if(!chs.length){el.innerHTML='<div class="feed-empty" style="font-size:11px;color:var(--text-dim)">아래 설정에서 채널을 등록하세요</div>';return;}
+  el.innerHTML=chs.map(c=>{const href=ws?`https://app.slack.com/client/${ws}/`+c.name:`https://app.slack.com/client`;return`<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px;border-radius:6px;background:var(--surface2)"><a href="${href}" target="_blank" style="color:var(--text);font-size:12px;text-decoration:none;flex:1"># ${c.name}</a><button onclick="removeSlackChannel('${c.name}')" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:10px;padding:2px 4px">✕</button></div>`;}).join('');
+  const wsInp=document.getElementById('slackWsInput');if(wsInp&&ws)wsInp.value=ws;}
+
+// ===== RECURRING TASKS =====
+const RECUR_KEY='dcc-recurring-tasks';
+let recurringSection='business';
+function getRecurringTasks(){try{return JSON.parse(localStorage.getItem(RECUR_KEY))||[];}catch(e){return[];}}
+function saveRecurringTasks(tasks){localStorage.setItem(RECUR_KEY,JSON.stringify(tasks));if(firebaseRef)firebaseRef.child('_recurringTasks').set(tasks);}
+function openRecurring(section){recurringSection=section;const labels={business:'Business Tasks',personal:'Personal Tasks',progress:'In Progress'};document.getElementById('recurringSection').textContent=labels[section]||section;document.getElementById('recurTaskText').value='';document.getElementById('recurFreq').value='daily';document.getElementById('recurPriority').value='mid';toggleRecurDays();renderRecurringList();document.getElementById('recurringOverlay').classList.add('active');}
+function closeRecurring(){document.getElementById('recurringOverlay').classList.remove('active');}
+function toggleRecurDays(){const f=document.getElementById('recurFreq').value;document.getElementById('recurDaysWrap').style.display=f==='custom'?'flex':'none';document.querySelectorAll('.recur-day-cb').forEach(cb=>cb.checked=false);}
+function saveRecurringTask(){const text=document.getElementById('recurTaskText').value.trim();if(!text){showToast('내용을 입력하세요');return;}const freq=document.getElementById('recurFreq').value,priority=document.getElementById('recurPriority').value;let days=[];if(freq==='daily')days=[0,1,2,3,4,5,6];else if(freq==='weekdays')days=[1,2,3,4,5];else if(freq==='weekly')days=[currentDate.getDay()];else if(freq==='custom'){document.querySelectorAll('.recur-day-cb:checked').forEach(cb=>days.push(parseInt(cb.value)));if(!days.length){showToast('요일을 선택하세요');return;}}
+  const tasks=getRecurringTasks();tasks.push({id:Date.now(),text,section:recurringSection,priority,freq,days});saveRecurringTasks(tasks);document.getElementById('recurTaskText').value='';renderRecurringList();showToast('반복 태스크 등록됨');}
+function deleteRecurringTask(id){let tasks=getRecurringTasks();tasks=tasks.filter(t=>t.id!==id);saveRecurringTasks(tasks);renderRecurringList();}
+function renderRecurringList(){const tasks=getRecurringTasks().filter(t=>t.section===recurringSection),el=document.getElementById('recurringList');const dayNames=['일','월','화','수','목','금','토'];if(!tasks.length){el.innerHTML='<div style="font-size:11px;color:var(--text-dim);padding:4px">등록된 반복 태스크 없음</div>';return;}
+  el.innerHTML=tasks.map(t=>{const dStr=t.freq==='daily'?'매일':t.freq==='weekdays'?'평일':t.days.map(d=>dayNames[d]).join(',');const pStr=t.priority==='high'?'!!!':t.priority==='mid'?'!!':'!';return`<div style="display:flex;align-items:center;gap:6px;padding:5px 8px;background:var(--surface2);border-radius:6px"><span style="font-size:10px;color:var(--accent5)">${pStr}</span><span style="flex:1;font-size:11px">${t.text}</span><span style="font-size:9px;color:var(--text-dim);white-space:nowrap">${dStr}</span><button onclick="deleteRecurringTask(${t.id})" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:10px">✕</button></div>`;}).join('');}
+function applyRecurringTasks(){const key=dateKey(),dayData=data[key];const tasks=getRecurringTasks();if(!tasks.length)return;const dow=currentDate.getDay();const applicable=tasks.filter(t=>t.days.includes(dow));if(!applicable.length)return;
+  applicable.forEach(rt=>{const section=rt.section;const existing=dayData&&dayData.tasks&&dayData.tasks[section]?dayData.tasks[section]:[];const already=existing.some(t=>t.text===rt.text&&!t.carried);if(!already){const l=document.getElementById(section+'List'),item=createTaskItem(section,{text:rt.text,done:false,priority:rt.priority,carried:false});l.appendChild(item);}});updateCounts();}
 
 init();
 </script>
