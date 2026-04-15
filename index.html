@@ -838,10 +838,12 @@ function initFirebase(){
       const d=s.val();if(d){
         Object.keys(d).forEach(key=>{
           if(key==='_recurringTasks'){localStorage.setItem(RECUR_KEY,JSON.stringify(d[key]));return;}
+          if(key.startsWith('_'))return;
           if(!data[key]||new Date(d[key].lastModified||0)>new Date((data[key]||{}).lastModified||0)){
             data[key]=d[key];
           }
         });
+        revalidateCarryOver();
         saveLocalData();
         if(currentView==='day'&&currentPage==='dashboard'){loadDayData();fetchGcalEvents();}
         else if(currentView==='week')renderWeekView();
@@ -910,6 +912,35 @@ function updateCounts(){['business','personal','progress'].forEach(s=>{const l=d
 function updateStatsBar(){let t=0,d=0;['business','personal','progress'].forEach(s=>{const l=document.getElementById(s+'List');t+=l.querySelectorAll('.task-item').length;d+=l.querySelectorAll('.task-check.checked').length;});const dD=document.querySelectorAll('#directiveList .status-done').length,dT=document.getElementById('directiveList').querySelectorAll('.directive-item').length,sch=document.querySelectorAll('.time-content.has-content').length,pct=t>0?Math.round(d/t*100):0,carried=document.querySelectorAll('.task-item.carried-over').length;document.getElementById('statsBar').innerHTML=`<div class="stat-chip"><div class="stat-dot" style="background:${pct>=80?'var(--success)':pct>=40?'var(--accent3)':'var(--danger)'}"></div>완료율 ${pct}%</div><div class="stat-chip"><div class="stat-dot" style="background:var(--accent)"></div>할 일 ${d}/${t}</div><div class="stat-chip"><div class="stat-dot" style="background:var(--accent4)"></div>지시 ${dD}/${dT}</div><div class="stat-chip"><div class="stat-dot" style="background:var(--accent5)"></div>일정 ${sch}건</div>${carried>0?`<div class="stat-chip"><div class="stat-dot" style="background:var(--accent3)"></div>이월 ${carried}건</div>`:''}`;}
 
 // ===== CARRY-OVER =====
+function revalidateCarryOver(){
+  const key=dateKey();const td=data[key];if(!td||!td.tasks)return;
+  let changed=false;const yp=key.slice(0,5);
+  ['business','personal','progress'].forEach(s=>{
+    if(!td.tasks[s])return;
+    td.tasks[s]=td.tasks[s].filter(t=>{
+      if(t.carried&&!t.done&&t.carriedFrom){
+        const srcKey=yp+t.carriedFrom;const srcDay=data[srcKey];
+        if(srcDay&&srcDay.tasks&&srcDay.tasks[s]){
+          const match=srcDay.tasks[s].find(st=>st.text===t.text&&st.done);
+          if(match){changed=true;return false;}
+        }
+      }
+      return true;
+    });
+  });
+  if(td.directives){td.directives=td.directives.filter(d=>{
+    if(d.carried&&d.status!=='done'){
+      const dates=Object.keys(data).sort().reverse();
+      for(const dk of dates){if(dk<key&&data[dk]&&data[dk].directives){
+        const match=data[dk].directives.find(sd=>sd.text===d.text&&sd.status==='done');
+        if(match){changed=true;return false;}
+      }}
+    }return true;
+  });}
+  if(changed){td.lastModified=new Date().toISOString();data[key]=td;saveLocalData();
+    if(firebaseRef){_lastPushedKey=key;firebaseRef.child(key).set(td);}
+  }
+}
 function getCarryOverTasks(){const key=dateKey();if(data[key])return null;const dates=Object.keys(data).sort().reverse();let prev=null;for(const dk of dates){if(dk<key){prev=dk;break;}}if(!prev)return null;const pd=data[prev];const carry={tasks:{},directives:[]};let has=false;if(pd.tasks){['business','personal','progress'].forEach(s=>{carry.tasks[s]=[];(pd.tasks[s]||[]).forEach(t=>{if(!t.done&&t.text&&t.text.trim()){carry.tasks[s].push({...t,carried:true,carriedFrom:prev.slice(5)});has=true;}});});}if(pd.directives){pd.directives.forEach(d=>{if(d.status!=='done'&&d.text&&d.text.trim()){carry.directives.push({...d,carried:true});has=true;}});}return has?carry:null;}
 
 // ===== DATA =====
