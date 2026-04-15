@@ -1023,6 +1023,19 @@ function saveDayData(){
 }
 function loadDayData(){
   const key=dateKey();let dayData=data[key];
+  // Auto-clear stale carry-over data: if this day's data is older than prev day's data, reset it
+  if(dayData&&dayData.lastModified){
+    const dates=Object.keys(data).filter(k=>!k.startsWith('_')&&k<key).sort().reverse();
+    if(dates.length){const pd=data[dates[0]];
+      if(pd&&pd.lastModified&&new Date(pd.lastModified)>new Date(dayData.lastModified)){
+        // Previous day was modified AFTER this day was saved → this day's carry-over is stale
+        let onlyCarried=true;
+        if(dayData.tasks){['business','personal','progress'].forEach(s=>{(dayData.tasks[s]||[]).forEach(t=>{if(!t.carried)onlyCarried=false;});});}
+        if(dayData.memo&&dayData.memo.trim())onlyCarried=false;
+        if(onlyCarried){delete data[key];dayData=null;saveLocalData();if(firebaseRef)firebaseRef.child(key).remove();}
+      }
+    }
+  }
   ['business','personal','progress'].forEach(s=>document.getElementById(s+'List').innerHTML='');
   document.getElementById('directiveList').innerHTML='';
   document.querySelectorAll('.time-content').forEach(el=>{el.textContent='';el.classList.remove('has-content');});
