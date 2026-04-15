@@ -323,12 +323,12 @@
     <!-- RIGHT COLUMN: TABBED -->
     <div class="right-col">
       <div class="right-tabs">
-        <button class="right-tab active" onclick="switchRightTab('memo')">Memo</button>
+        <button class="right-tab" onclick="switchRightTab('memo')">Memo</button>
         <button class="right-tab" onclick="switchRightTab('calendar')">Calendar</button>
         <button class="right-tab" onclick="switchRightTab('feed')">Feed</button>
-        <button class="right-tab" onclick="switchRightTab('slack')">Slack</button>
+        <button class="right-tab active" onclick="switchRightTab('slack')">Slack</button>
       </div>
-      <div class="right-panel active" id="panelMemo">
+      <div class="right-panel" id="panelMemo">
         <div style="padding:6px 14px;font-size:10px;color:var(--text-dim);text-align:right;border-bottom:1px solid var(--border)" id="memoCharCount">0자</div>
         <div class="memo-body"><textarea class="memo-textarea" id="memoArea" placeholder="메모, 아이디어, 회의록..." oninput="onMemoInput()"></textarea></div>
       </div>
@@ -361,7 +361,7 @@
           <div id="gmailDigestDate" style="font-size:9px;color:var(--text-dim);text-align:right;padding-top:4px"></div>
         </div>
       </div>
-      <div class="right-panel" id="panelSlack">
+      <div class="right-panel active" id="panelSlack">
         <div class="feed-section" style="padding:8px 12px;display:flex;align-items:center;justify-content:space-between">
           <div class="feed-section-title" style="margin:0">💬 Slack Daily Digest</div>
           <div style="display:flex;align-items:center;gap:6px">
