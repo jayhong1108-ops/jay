@@ -915,14 +915,19 @@ function updateStatsBar(){let t=0,d=0;['business','personal','progress'].forEach
 function revalidateCarryOver(){
   const key=dateKey();const td=data[key];if(!td||!td.tasks)return;
   let changed=false;const yp=key.slice(0,5);
+  // Check ALL previous days for completed version of each carried task
+  const prevDays=Object.keys(data).filter(k=>k<key&&!k.startsWith('_')).sort().reverse();
   ['business','personal','progress'].forEach(s=>{
     if(!td.tasks[s])return;
     td.tasks[s]=td.tasks[s].filter(t=>{
-      if(t.carried&&!t.done&&t.carriedFrom){
-        const srcKey=yp+t.carriedFrom;const srcDay=data[srcKey];
-        if(srcDay&&srcDay.tasks&&srcDay.tasks[s]){
-          const match=srcDay.tasks[s].find(st=>st.text===t.text&&st.done);
-          if(match){changed=true;return false;}
+      if(t.carried&&!t.done){
+        // Search through all previous days for this task being completed
+        for(const pk of prevDays){
+          const pd=data[pk];
+          if(pd&&pd.tasks&&pd.tasks[s]){
+            const match=pd.tasks[s].find(st=>st.text===t.text&&st.done);
+            if(match){changed=true;return false;}
+          }
         }
       }
       return true;
@@ -939,6 +944,11 @@ function revalidateCarryOver(){
   });}
   if(changed){td.lastModified=new Date().toISOString();data[key]=td;saveLocalData();
     if(firebaseRef){_lastPushedKey=key;firebaseRef.child(key).set(td);}
+    // Re-render DOM if we're viewing this day
+    if(currentView==='day'&&currentPage==='dashboard'&&dateKey()===key){
+      ['business','personal','progress'].forEach(s=>{const l=document.getElementById(s+'List');l.innerHTML='';(td.tasks[s]||[]).forEach(t=>l.appendChild(createTaskItem(s,t)));});
+      if(td.directives){const dl=document.getElementById('directiveList');dl.innerHTML='';td.directives.forEach(d=>dl.appendChild(createDirectiveItem(d)));}
+    }
   }
 }
 function getCarryOverTasks(){const key=dateKey();if(data[key])return null;const dates=Object.keys(data).sort().reverse();let prev=null;for(const dk of dates){if(dk<key){prev=dk;break;}}if(!prev)return null;const pd=data[prev];const carry={tasks:{},directives:[]};let has=false;if(pd.tasks){['business','personal','progress'].forEach(s=>{carry.tasks[s]=[];(pd.tasks[s]||[]).forEach(t=>{if(!t.done&&t.text&&t.text.trim()){carry.tasks[s].push({...t,carried:true,carriedFrom:prev.slice(5)});has=true;}});});}if(pd.directives){pd.directives.forEach(d=>{if(d.status!=='done'&&d.text&&d.text.trim()){carry.directives.push({...d,carried:true});has=true;}});}return has?carry:null;}
@@ -973,6 +983,7 @@ function loadDayData(){
     if(dayData.directives){const l=document.getElementById('directiveList');dayData.directives.forEach(d=>l.appendChild(createDirectiveItem(d)));}
     document.getElementById('memoArea').value=dayData.memo||'';
   }else{document.getElementById('memoArea').value='';}
+  revalidateCarryOver();
   document.getElementById('memoCharCount').textContent=document.getElementById('memoArea').value.length+'자';updateCounts();updateCurrentTimeIndicator();applyRecurringTasks();
 }
 
