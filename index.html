@@ -365,26 +365,20 @@
         </div>
       </div>
       <div class="right-panel" id="panelSlack">
-        <div class="feed-section">
-          <div class="feed-section-title">💬 Slack Workspace</div>
-          <a href="https://app.slack.com/client" target="_blank" class="feed-link-btn">💬 Slack 열기</a>
-          <a href="https://app.slack.com/client/threads" target="_blank" class="feed-link-btn">🧵 스레드</a>
-          <a href="https://app.slack.com/client/unreads" target="_blank" class="feed-link-btn">🔔 읽지 않은 메시지</a>
-          <a href="https://app.slack.com/client/activity" target="_blank" class="feed-link-btn">📊 활동</a>
-        </div>
-        <div class="feed-section">
-          <div class="feed-section-title">📌 즐겨찾기 채널</div>
-          <div id="slackFavChannels" style="display:flex;flex-direction:column;gap:4px;padding:4px 0">
-            <div class="feed-empty" style="font-size:11px;color:var(--text-dim)">아래 설정에서 채널을 등록하세요</div>
+        <div class="feed-section" style="padding:8px 12px;display:flex;align-items:center;justify-content:space-between">
+          <div class="feed-section-title" style="margin:0">💬 Slack Daily Digest</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span id="slackDigestDate" style="font-size:9px;color:var(--text-dim)"></span>
+            <a href="https://app.slack.com/client" target="_blank" class="btn" style="padding:3px 8px;font-size:10px">Slack 열기</a>
           </div>
         </div>
         <div class="feed-section">
-          <div class="feed-section-title">⚙️ 채널 설정</div>
-          <div style="padding:4px 0">
-            <div style="display:flex;gap:4px"><input id="slackChInput" placeholder="채널명 (예: general)" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:4px;font-size:11px"><button class="btn" onclick="addSlackChannel()" style="padding:3px 8px;font-size:11px">추가</button></div>
-            <div style="display:flex;gap:4px;margin-top:4px"><input id="slackWsInput" placeholder="워크스페이스 ID (예: T01ABCDEF)" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:4px;font-size:11px"><button class="btn" onclick="saveSlackWs()" style="padding:3px 8px;font-size:11px">저장</button></div>
-            <div style="font-size:10px;color:var(--text-dim);margin-top:4px">워크스페이스 ID: Slack URL의 /client/T01ABCDEF 부분</div>
-          </div>
+          <div class="feed-section-title">📢 채널 업데이트</div>
+          <div id="slackChannelDigest"><div class="feed-empty">다이제스트 로딩 중...</div></div>
+        </div>
+        <div class="feed-section">
+          <div class="feed-section-title">📩 받은 DM 요약</div>
+          <div id="slackDmDigest"><div class="feed-empty">DM 로딩 중...</div></div>
         </div>
       </div>
     </div>
@@ -555,7 +549,7 @@ function init(){
   renderDateDisplay();buildTimeSlots();loadDayData();
   updateCurrentTimeIndicator();setInterval(updateCurrentTimeIndicator,60000);
   loadCalendarEmbed();loadEmailLinks();loadFeeds();loadDaouMail();fetchGcalEvents();
-  renderSlackChannels();applyRecurringTasks();
+  loadSlackDigest();applyRecurringTasks();
   requestNotificationPermission();
   // 30초마다 자동저장 (안전망)
   setInterval(()=>{if(currentView==='day'&&currentPage==='dashboard')saveDayData();},30000);
@@ -801,8 +795,14 @@ function initFirebase(){
     // Listen per-day changes instead of whole tree
     firebaseRef.on('child_changed',s=>{
       const key=s.key,val=s.val();
+      if(key.startsWith('_'))return;// skip meta keys
       if(_lastPushedKey===key){_lastPushedKey=null;return;}
-      if(val){data[key]=val;saveLocalData();
+      if(val){
+        // Only accept if remote is newer
+        const remoteTs=new Date(val.lastModified||0).getTime();
+        const localTs=new Date((data[key]||{}).lastModified||0).getTime();
+        if(remoteTs<=localTs)return;
+        data[key]=val;saveLocalData();
         if(currentPage==='dashboard'){
           if(currentView==='day'&&dateKey()===key){loadDayData();fetchGcalEvents();}
           else if(currentView==='week')renderWeekView();
@@ -813,6 +813,7 @@ function initFirebase(){
     });
     firebaseRef.on('child_added',s=>{
       const key=s.key,val=s.val();
+      if(key.startsWith('_'))return;// skip meta keys
       if(_lastPushedKey===key){_lastPushedKey=null;return;}
       if(val&&!data[key]){data[key]=val;saveLocalData();
         if(currentPage==='dashboard'){
@@ -846,7 +847,7 @@ function initFirebase(){
         else if(currentView==='week')renderWeekView();
         else if(currentView==='month')renderMonthView();
       }
-      isFirebaseConnected=true;updateSyncUI('online');
+      isFirebaseConnected=true;updateSyncUI('online');loadSlackDigest();
     });
     firebase.database().ref('.info/connected').on('value',s=>updateSyncUI(s.val()?'online':'offline'));
     updateSyncUI('online');
@@ -968,16 +969,29 @@ function seedInitialData(){
   saveLocalData();if(firebaseRef){Object.keys(data).forEach(k=>{firebaseRef.child(k).set(data[k]);});}
 }
 
-// ===== SLACK CHANNELS =====
-const SLACK_CH_KEY='dcc-slack-channels',SLACK_WS_KEY='dcc-slack-ws';
-function getSlackChannels(){try{return JSON.parse(localStorage.getItem(SLACK_CH_KEY))||[];}catch(e){return[];}}
-function getSlackWs(){return localStorage.getItem(SLACK_WS_KEY)||'';}
-function saveSlackWs(){const v=document.getElementById('slackWsInput').value.trim();if(v){localStorage.setItem(SLACK_WS_KEY,v);renderSlackChannels();showToast('워크스페이스 ID 저장됨');}else{showToast('워크스페이스 ID를 입력하세요');}}
-function addSlackChannel(){const inp=document.getElementById('slackChInput'),name=inp.value.trim();if(!name){showToast('채널명을 입력하세요');return;}const chs=getSlackChannels();if(chs.find(c=>c.name===name)){showToast('이미 등록된 채널');return;}chs.push({name});localStorage.setItem(SLACK_CH_KEY,JSON.stringify(chs));inp.value='';renderSlackChannels();showToast(`#${name} 추가됨`);}
-function removeSlackChannel(name){let chs=getSlackChannels();chs=chs.filter(c=>c.name!==name);localStorage.setItem(SLACK_CH_KEY,JSON.stringify(chs));renderSlackChannels();}
-function renderSlackChannels(){const chs=getSlackChannels(),ws=getSlackWs(),el=document.getElementById('slackFavChannels');if(!chs.length){el.innerHTML='<div class="feed-empty" style="font-size:11px;color:var(--text-dim)">아래 설정에서 채널을 등록하세요</div>';return;}
-  el.innerHTML=chs.map(c=>{const href=ws?`https://app.slack.com/client/${ws}/`+c.name:`https://app.slack.com/client`;return`<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px;border-radius:6px;background:var(--surface2)"><a href="${href}" target="_blank" style="color:var(--text);font-size:12px;text-decoration:none;flex:1"># ${c.name}</a><button onclick="removeSlackChannel('${c.name}')" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:10px;padding:2px 4px">✕</button></div>`;}).join('');
-  const wsInp=document.getElementById('slackWsInput');if(wsInp&&ws)wsInp.value=ws;}
+// ===== SLACK DIGEST =====
+function loadSlackDigest(){
+  if(!firebaseRef)return;
+  firebase.database().ref('commandCenter/_slackDigest').on('value',s=>{
+    const d=s.val();if(!d){document.getElementById('slackChannelDigest').innerHTML='<div class="feed-empty">다이제스트 없음</div>';document.getElementById('slackDmDigest').innerHTML='<div class="feed-empty">DM 없음</div>';return;}
+    // Date
+    const dateEl=document.getElementById('slackDigestDate');
+    if(d.updatedAt){const dt=new Date(d.updatedAt);dateEl.textContent=`${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')} 업데이트`;}
+    // Channels
+    const chEl=document.getElementById('slackChannelDigest');
+    if(d.channels&&d.channels.length){
+      chEl.innerHTML=d.channels.filter(ch=>ch.messages&&ch.messages.length).map(ch=>{
+        const msgs=ch.messages.map(m=>`<div style="display:flex;gap:6px;padding:3px 0"><span style="font-size:10px;color:var(--text-dim);min-width:32px;flex-shrink:0">${m.time}</span><span style="font-size:10px;color:var(--accent);min-width:36px;flex-shrink:0">${m.from}</span><span style="font-size:11px;flex:1">${escHtml(m.text).slice(0,120)}${m.text.length>120?'...':''}</span></div>`).join('');
+        return`<div style="margin-bottom:10px"><div style="font-size:11px;font-weight:700;color:var(--accent5);margin-bottom:4px"># ${ch.name} <span style="font-size:9px;color:var(--text-dim);font-weight:400">${ch.messages.length}건</span></div>${msgs}</div>`;
+      }).join('');
+    }else{chEl.innerHTML='<div class="feed-empty">오늘 채널 업데이트 없음</div>';}
+    // DMs
+    const dmEl=document.getElementById('slackDmDigest');
+    if(d.dms&&d.dms.length){
+      dmEl.innerHTML=d.dms.map(dm=>`<div style="padding:6px 8px;margin-bottom:6px;background:var(--surface2);border-radius:6px;border-left:3px solid var(--accent2)"><div style="font-size:11px;font-weight:700;color:var(--accent2);margin-bottom:3px">💬 ${dm.from}</div><div style="font-size:11px;line-height:1.5;color:var(--text)">${escHtml(dm.summary)}</div></div>`).join('');
+    }else{dmEl.innerHTML='<div class="feed-empty">오늘 받은 DM 없음</div>';}
+  });
+}
 
 // ===== RECURRING TASKS =====
 const RECUR_KEY='dcc-recurring-tasks';
@@ -993,7 +1007,14 @@ function deleteRecurringTask(id){let tasks=getRecurringTasks();tasks=tasks.filte
 function renderRecurringList(){const tasks=getRecurringTasks().filter(t=>t.section===recurringSection),el=document.getElementById('recurringList');const dayNames=['일','월','화','수','목','금','토'];if(!tasks.length){el.innerHTML='<div style="font-size:11px;color:var(--text-dim);padding:4px">등록된 반복 태스크 없음</div>';return;}
   el.innerHTML=tasks.map(t=>{const dStr=t.freq==='daily'?'매일':t.freq==='weekdays'?'평일':t.days.map(d=>dayNames[d]).join(',');const pStr=t.priority==='high'?'!!!':t.priority==='mid'?'!!':'!';return`<div style="display:flex;align-items:center;gap:6px;padding:5px 8px;background:var(--surface2);border-radius:6px"><span style="font-size:10px;color:var(--accent5)">${pStr}</span><span style="flex:1;font-size:11px">${t.text}</span><span style="font-size:9px;color:var(--text-dim);white-space:nowrap">${dStr}</span><button onclick="deleteRecurringTask(${t.id})" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:10px">✕</button></div>`;}).join('');}
 function applyRecurringTasks(){const key=dateKey(),dayData=data[key];const tasks=getRecurringTasks();if(!tasks.length)return;const dow=currentDate.getDay();const applicable=tasks.filter(t=>t.days.includes(dow));if(!applicable.length)return;
-  applicable.forEach(rt=>{const section=rt.section;const existing=dayData&&dayData.tasks&&dayData.tasks[section]?dayData.tasks[section]:[];const already=existing.some(t=>t.text===rt.text&&!t.carried);if(!already){const l=document.getElementById(section+'List'),item=createTaskItem(section,{text:rt.text,done:false,priority:rt.priority,carried:false});l.appendChild(item);}});updateCounts();}
+  applicable.forEach(rt=>{const section=rt.section;
+    // Check saved data first
+    const saved=dayData&&dayData.tasks&&dayData.tasks[section]?dayData.tasks[section]:[];
+    if(saved.some(t=>t.text===rt.text))return;
+    // Also check DOM (in case tasks exist but not yet saved)
+    const domTexts=[];document.getElementById(section+'List').querySelectorAll('.task-text').forEach(el=>domTexts.push(el.value||el.textContent));
+    if(domTexts.includes(rt.text))return;
+    const l=document.getElementById(section+'List'),item=createTaskItem(section,{text:rt.text,done:false,priority:rt.priority,carried:false});l.appendChild(item);});updateCounts();}
 
 init();
 </script>
