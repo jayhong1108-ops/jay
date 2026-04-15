@@ -933,6 +933,40 @@ function updateCounts(){['business','personal','progress'].forEach(s=>{const l=d
 function updateStatsBar(){let t=0,d=0;['business','personal','progress'].forEach(s=>{const l=document.getElementById(s+'List');t+=l.querySelectorAll('.task-item').length;d+=l.querySelectorAll('.task-check.checked').length;});const dD=document.querySelectorAll('#directiveList .status-done').length,dT=document.getElementById('directiveList').querySelectorAll('.directive-item').length,sch=document.querySelectorAll('.time-content.has-content').length,pct=t>0?Math.round(d/t*100):0,carried=document.querySelectorAll('.task-item.carried-over').length;document.getElementById('statsBar').innerHTML=`<div class="stat-chip"><div class="stat-dot" style="background:${pct>=80?'var(--success)':pct>=40?'var(--accent3)':'var(--danger)'}"></div>완료율 ${pct}%</div><div class="stat-chip"><div class="stat-dot" style="background:var(--accent)"></div>할 일 ${d}/${t}</div><div class="stat-chip"><div class="stat-dot" style="background:var(--accent4)"></div>지시 ${dD}/${dT}</div><div class="stat-chip"><div class="stat-dot" style="background:var(--accent5)"></div>일정 ${sch}건</div>${carried>0?`<div class="stat-chip"><div class="stat-dot" style="background:var(--accent3)"></div>이월 ${carried}건</div>`:''}`;}
 
 // ===== CARRY-OVER =====
+function mergeNewFromPrevDay(key,dayData){
+  const dates=Object.keys(data).filter(k=>!k.startsWith('_')&&k<key).sort().reverse();
+  if(!dates.length)return;const prevKey=dates[0];const pd=data[prevKey];
+  if(!pd||!pd.tasks)return;
+  let changed=false;
+  ['business','personal','progress'].forEach(s=>{
+    const currentTexts=new Set((dayData.tasks&&dayData.tasks[s]||[]).map(t=>t.text));
+    (pd.tasks[s]||[]).forEach(t=>{
+      if(!t.done&&t.text&&t.text.trim()&&!currentTexts.has(t.text)){
+        if(!dayData.tasks)dayData.tasks={};if(!dayData.tasks[s])dayData.tasks[s]=[];
+        const nt={text:t.text,done:false,priority:t.priority||'mid',carried:true,carriedFrom:prevKey.slice(5)};
+        dayData.tasks[s].push(nt);
+        document.getElementById(s+'List').appendChild(createTaskItem(s,nt));
+        changed=true;
+      }
+    });
+  });
+  if(pd.directives){
+    const curDirTexts=new Set((dayData.directives||[]).map(d=>d.text));
+    pd.directives.forEach(d=>{
+      if(d.status!=='done'&&d.text&&d.text.trim()&&!curDirTexts.has(d.text)){
+        if(!dayData.directives)dayData.directives=[];
+        const nd={...d,carried:true};dayData.directives.push(nd);
+        document.getElementById('directiveList').appendChild(createDirectiveItem(nd));
+        changed=true;
+      }
+    });
+  }
+  if(changed){
+    dayData.lastModified=new Date().toISOString();data[key]=dayData;saveLocalData();
+    if(firebaseRef){_lastPushedKey=key;firebaseRef.child(key).set(dayData);}
+    showToast(`전날 미완료 ${changed?'태스크 추가됨':''}`);
+  }
+}
 function revalidateCarryOver(){
   const key=dateKey();const td=data[key];if(!td||!td.tasks)return;
   let changed=false;const yp=key.slice(0,5);
@@ -1002,6 +1036,8 @@ function loadDayData(){
     if(dayData.schedule){Object.entries(dayData.schedule).forEach(([time,content])=>{if(content.startsWith('📅'))return;const el=document.querySelector(`.time-content[data-time="${time}"]`);if(el){el.textContent=content;el.classList.add('has-content');}});}
     if(dayData.directives){const l=document.getElementById('directiveList');dayData.directives.forEach(d=>l.appendChild(createDirectiveItem(d)));}
     document.getElementById('memoArea').value=dayData.memo||'';
+    // Merge new uncompleted tasks from previous day that aren't already here
+    mergeNewFromPrevDay(key,dayData);
   }else{document.getElementById('memoArea').value='';}
   revalidateCarryOver();
   document.getElementById('memoCharCount').textContent=document.getElementById('memoArea').value.length+'자';updateCounts();updateCurrentTimeIndicator();applyRecurringTasks();
