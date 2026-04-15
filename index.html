@@ -660,8 +660,11 @@ const GCAL_SOURCES=[
   {id:'5173c412e4f8f8f24634022ad19958c9f9d3c609478dfb0a5e9c8c9f9c9ae285@group.calendar.google.com',key:'AIzaSyDY2_dXSoIQb5K6DHf2VsH8JGCRX3zDVCQ'},
   {id:'1d785eb21678c76fc9e4a3ac84e55cc922104e51112acf07651244e5c4c80578@group.calendar.google.com',key:'AIzaSyDY2_dXSoIQb5K6DHf2VsH8JGCRX3zDVCQ'}
 ];
+let _gcalFetchId=0;
 async function fetchGcalEvents(){
   if(currentView!=='day')return;
+  const fetchId=++_gcalFetchId;
+  const targetKey=dateKey();
   const d=new Date(currentDate);
   const timeMin=new Date(d.getFullYear(),d.getMonth(),d.getDate(),0,0,0).toISOString();
   const timeMax=new Date(d.getFullYear(),d.getMonth(),d.getDate(),23,59,59).toISOString();
@@ -670,21 +673,27 @@ async function fetchGcalEvents(){
     try{
       const url=`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(src.id)}/events?key=${src.key}&timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime&maxResults=50`;
       const res=await fetch(url);
+      if(fetchId!==_gcalFetchId)return; // Stale fetch, abort
       if(!res.ok)continue;
-      const data=await res.json();
-      if(data.items)allEvents.push(...data.items);
+      const json=await res.json();
+      if(fetchId!==_gcalFetchId)return; // Stale fetch, abort
+      if(json.items)allEvents.push(...json.items);
     }catch(e){}
   }
-  if(!allEvents.length)return;
-  // Sort by start time
+  if(fetchId!==_gcalFetchId)return; // Final stale check
+  if(dateKey()!==targetKey)return; // Date changed during fetch
+  // Clear old gcal events before rendering
+  document.querySelectorAll('.time-content').forEach(el=>{
+    if(el.dataset.gcal){el.textContent='';el.classList.remove('has-content');el.style.color='';delete el.dataset.gcal;}
+  });
+  if(!allEvents.length){updateCounts();return;}
   allEvents.sort((a,b)=>{
     const aT=new Date(a.start.dateTime||a.start.date);
     const bT=new Date(b.start.dateTime||b.start.date);
     return aT-bT;
   });
-  // Place events into time slots
   allEvents.forEach(ev=>{
-    if(!ev.start.dateTime)return; // skip all-day events
+    if(!ev.start.dateTime)return;
     const start=new Date(ev.start.dateTime);
     const h=start.getHours(),m=start.getMinutes();
     const slot=m>=30?`${String(h).padStart(2,'0')}:30`:`${String(h).padStart(2,'0')}:00`;
@@ -703,9 +712,10 @@ async function fetchGcalEvents(){
       }
       el.classList.add('has-content');
       el.style.color='var(--accent3)';
+      el.dataset.gcal='1';
     }
   });
-  debounceSave();
+  updateCounts();
 }
 
 // ===== NEWS FEEDS =====
@@ -962,7 +972,7 @@ function saveDayData(){
   if(currentView!=='day'||currentPage!=='dashboard')return;
   const key=dateKey(),dd={tasks:{},schedule:{},directives:[],memo:''};
   ['business','personal','progress'].forEach(s=>{dd.tasks[s]=[];document.getElementById(s+'List').querySelectorAll('.task-item').forEach(item=>{const text=item.querySelector('.task-text').value;if(text.trim()||document.activeElement===item.querySelector('.task-text')){const pEl=item.querySelector('.task-priority'),p=pEl.classList.contains('priority-high')?'high':pEl.classList.contains('priority-mid')?'mid':'low';dd.tasks[s].push({text,done:item.querySelector('.task-check').classList.contains('checked'),priority:p,carried:item.classList.contains('carried-over'),carriedFrom:item.querySelector('.carry-tag')?.textContent.replace('↻','')||''});}});});
-  document.querySelectorAll('.time-content').forEach(el=>{const c=el.textContent.trim();if(c)dd.schedule[el.dataset.time]=c;});
+  document.querySelectorAll('.time-content').forEach(el=>{const c=el.textContent.trim();if(c&&!el.dataset.gcal)dd.schedule[el.dataset.time]=c;});
   document.getElementById('directiveList').querySelectorAll('.directive-item').forEach(item=>{const text=item.querySelector('.directive-text').value;if(text.trim()||document.activeElement===item.querySelector('.directive-text')){const sEl=item.querySelector('.directive-status'),st=sEl.classList.contains('status-done')?'done':sEl.classList.contains('status-waiting')?'waiting':'pending';dd.directives.push({text,assignee:item.querySelector('input[type="text"]').value,status:st,carried:item.classList.contains('carried-over')});}});
   dd.memo=document.getElementById('memoArea').value;dd.lastModified=new Date().toISOString();data[key]=dd;saveLocalData();
   if(firebaseRef){_lastPushedKey=key;firebaseRef.child(key).set(dd);}
@@ -979,7 +989,7 @@ function loadDayData(){
     document.getElementById('memoArea').value='';showToast(`미완료 ${document.querySelectorAll('.carried-over').length}건 이월`);setTimeout(()=>saveDayData(),100);
   }else if(dayData){
     if(dayData.tasks){['business','personal','progress'].forEach(s=>{const l=document.getElementById(s+'List');(dayData.tasks[s]||[]).forEach(t=>l.appendChild(createTaskItem(s,t)));});}
-    if(dayData.schedule){Object.entries(dayData.schedule).forEach(([time,content])=>{const el=document.querySelector(`.time-content[data-time="${time}"]`);if(el){el.textContent=content;el.classList.add('has-content');}});}
+    if(dayData.schedule){Object.entries(dayData.schedule).forEach(([time,content])=>{if(content.startsWith('📅'))return;const el=document.querySelector(`.time-content[data-time="${time}"]`);if(el){el.textContent=content;el.classList.add('has-content');}});}
     if(dayData.directives){const l=document.getElementById('directiveList');dayData.directives.forEach(d=>l.appendChild(createDirectiveItem(d)));}
     document.getElementById('memoArea').value=dayData.memo||'';
   }else{document.getElementById('memoArea').value='';}
