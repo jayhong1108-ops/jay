@@ -344,24 +344,21 @@
         <!-- DAOUOFFICE SECTION -->
         <div class="feed-section">
           <div class="feed-section-title">🏢 다우오피스</div>
-          <a href="https://clify.daouoffice.com/gw/app/approval" target="_blank" class="feed-link-btn">📋 전자결재</a>
-          <a href="https://clify.daouoffice.com/gw/app/mail" target="_blank" class="feed-link-btn">📧 메일함</a>
-          <div style="padding:6px 0;font-size:10px;font-weight:700;color:var(--text-dim);letter-spacing:.5px">결재 대기</div>
+          <div style="display:flex;gap:6px;margin-bottom:8px">
+            <a href="https://clify.daouoffice.com/gw/app/approval" target="_blank" class="feed-link-btn" style="flex:1;justify-content:center">📋 전자결재</a>
+            <a href="https://clify.daouoffice.com/gw/app/mail" target="_blank" class="feed-link-btn" style="flex:1;justify-content:center">📧 메일함</a>
+          </div>
+          <div style="padding:4px 0;font-size:10px;font-weight:700;color:var(--text-dim);letter-spacing:.5px">📋 전자결재 대기</div>
           <div id="daouApproval" style="padding:4px 8px;font-size:11px;color:var(--success)">✓ 대기 문서 없음</div>
-          <div style="padding:8px 0 4px;font-size:10px;font-weight:700;color:var(--text-dim);letter-spacing:.5px">받은메일함 (최신)</div>
-          <div id="daouMailList"></div>
+          <div style="padding:8px 0 4px;font-size:10px;font-weight:700;color:var(--text-dim);letter-spacing:.5px">📧 읽지않은 메일</div>
+          <div id="daouMailList"><div class="feed-empty">로딩 중...</div></div>
         </div>
-        <!-- EMAIL SECTION -->
-        <div class="feed-section" id="feedEmailSection">
-          <div class="feed-section-title">📧 Gmail</div>
-          <div id="emailLinks"><div class="feed-empty">설정에서 캘린더 계정을 등록하면<br>Gmail 바로가기가 표시됩니다.</div></div>
-        </div>
-        <!-- NEWS SECTION -->
+        <!-- GMAIL SECTION -->
         <div class="feed-section">
-          <div class="feed-section-title">📰 뉴스피드</div>
-          <a href="https://outstanding.kr" target="_blank" class="feed-link-btn">📰 아웃스탠딩 열기</a>
-          <a href="https://www.linkedin.com/feed/" target="_blank" class="feed-link-btn">💼 LinkedIn 열기</a>
-          <div id="feedList"><div class="feed-empty">피드 로딩 중...</div></div>
+          <div class="feed-section-title">📧 Gmail 읽지않은 메일</div>
+          <div style="display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap" id="gmailAccountLinks"></div>
+          <div id="gmailUnreadList"><div class="feed-empty">로딩 중...</div></div>
+          <div id="gmailDigestDate" style="font-size:9px;color:var(--text-dim);text-align:right;padding-top:4px"></div>
         </div>
       </div>
       <div class="right-panel" id="panelSlack">
@@ -548,7 +545,7 @@ function init(){
   loadLocalData();seedInitialData();initFirebase();
   renderDateDisplay();buildTimeSlots();loadDayData();
   updateCurrentTimeIndicator();setInterval(updateCurrentTimeIndicator,60000);
-  loadCalendarEmbed();loadEmailLinks();loadFeeds();loadDaouMail();fetchGcalEvents();
+  loadCalendarEmbed();loadEmailLinks();loadDaouMail();loadGmailFeed();fetchGcalEvents();
   loadSlackDigest();applyRecurringTasks();
   requestNotificationPermission();
   // 30초마다 자동저장 (안전망)
@@ -576,7 +573,7 @@ function switchRightTab(t){
   document.querySelectorAll('.right-panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('panel'+t.charAt(0).toUpperCase()+t.slice(1)).classList.add('active');
   if(t==='calendar')loadCalendarEmbed();
-  if(t==='feed')loadFeeds();
+  if(t==='feed'){loadDaouMail();loadGmailFeed();}
 }
 
 // ===== GOOGLE CALENDAR =====
@@ -601,9 +598,9 @@ function loadCalendarEmbed(){
   wrap.innerHTML=`<iframe src="${url}" style="width:100%;height:100%;border:none;filter:invert(.88) hue-rotate(180deg);min-height:500px"></iframe>`;
 }
 function loadEmailLinks(){
-  const c=getCalConfig(),el=document.getElementById('emailLinks'),emails=[c.cal1,c.cal2,c.cal3].filter(Boolean);
-  if(!emails.length){el.innerHTML='<div class="feed-empty">설정에서 캘린더 계정을 등록하면<br>Gmail 바로가기가 표시됩니다.</div>';return;}
-  el.innerHTML=emails.map(e=>`<a href="https://mail.google.com/mail/u/?authuser=${encodeURIComponent(e)}" target="_blank" class="feed-link-btn">📧 ${e}</a>`).join('');
+  const c=getCalConfig(),el=document.getElementById('gmailAccountLinks'),emails=[c.cal1,c.cal2,c.cal3].filter(Boolean);
+  if(!emails.length){el.innerHTML='';return;}
+  el.innerHTML=emails.map(e=>`<a href="https://mail.google.com/mail/u/?authuser=${encodeURIComponent(e)}#inbox" target="_blank" class="feed-link-btn" style="padding:4px 8px;font-size:10px;flex-shrink:0">📧 ${e.split('@')[0]}</a>`).join('');
 }
 
 // ===== NOTIFICATIONS =====
@@ -627,29 +624,43 @@ function updateNotifUI(){
 }
 function toggleNotif(){document.getElementById('notifDropdown').classList.toggle('open');}
 
-// ===== DAOUOFFICE =====
-const DAOU_MAILS=[
-  {from:'박상민',subject:'[그룹바이] 2026년도 유쾌한프로젝트 채용 비용 절감 제안',url:'/gw/app/mail?work=read&folder=Inbox&uid=3796',tag:'채용'},
-  {from:'강진아',subject:'[유쾌한프로젝트] 입주실 출입률 관련 소명 및 시정계획 제출',url:'/gw/app/mail?work=read&folder=Inbox&uid=3793',tag:'관리'},
-  {from:'최윤석 변호사',subject:'RE: [HYUN] 서울중앙지법 2025가단12787 위약벌 등 사건',url:'/gw/app/mail?work=read&folder=Inbox&uid=3791',tag:'법무'},
-  {from:'인천콘텐츠기업지원센터',subject:'2026년 2월분 관리비 납부요청 (~3/31)',url:'/gw/app/mail?work=read&folder=Inbox&uid=3787',tag:'납부'},
-  {from:'홍동표',subject:'[D-3] 유럽시장 진출관련 무료웨비나 공지',url:'/gw/app/mail?work=read&folder=Inbox&uid=3786',tag:'네트워크'}
-];
+// ===== DAOUOFFICE & GMAIL FEED =====
 function loadDaouMail(){
-  const el=document.getElementById('daouMailList');
-  if(!el)return;
-  el.innerHTML=DAOU_MAILS.map(m=>{
-    const tagColors={채용:'var(--accent)',관리:'var(--accent3)',법무:'var(--danger)',납부:'var(--accent4)',네트워크:'var(--accent2)'};
-    return `<a href="https://clify.daouoffice.com${m.url}" target="_blank" class="feed-item" style="border-left:2px solid ${tagColors[m.tag]||'var(--border)'}">
-      <div><div class="feed-item-text">${m.subject}</div><div class="feed-item-meta">${m.from} · ${m.tag}</div></div></a>`;
-  }).join('');
-  // 알림 추가
-  const lastDaouCheck=parseInt(localStorage.getItem('lastDaouCheck')||'0');
-  if(lastDaouCheck===0){localStorage.setItem('lastDaouCheck',Date.now().toString());}
-  else if(Date.now()-lastDaouCheck>3600000){
-    addNotification('🏢','다우오피스',`받은메일 ${DAOU_MAILS.length}건`,'https://clify.daouoffice.com/gw/app/mail');
-    localStorage.setItem('lastDaouCheck',Date.now().toString());
-  }
+  if(!firebaseRef)return;
+  firebase.database().ref('commandCenter/_daouFeed').on('value',s=>{
+    const d=s.val();
+    // 전자결재 대기
+    const apEl=document.getElementById('daouApproval');
+    if(d&&d.approvals&&d.approvals.length){
+      apEl.innerHTML=d.approvals.map(a=>`<a href="https://clify.daouoffice.com${a.url||'/gw/app/approval'}" target="_blank" class="feed-item" style="border-left:2px solid var(--accent3)"><div><div class="feed-item-text">${escHtml(a.subject)}</div><div class="feed-item-meta">${a.from||''} · ${a.status||'대기'}</div></div></a>`).join('');
+    }else{apEl.innerHTML='<div style="padding:4px 8px;font-size:11px;color:var(--success)">✓ 대기 문서 없음</div>';}
+    // 읽지않은 메일
+    const mlEl=document.getElementById('daouMailList');
+    if(d&&d.mails&&d.mails.length){
+      mlEl.innerHTML=d.mails.map(m=>{
+        const tagColors={채용:'var(--accent)',관리:'var(--accent3)',법무:'var(--danger)',납부:'var(--accent4)',네트워크:'var(--accent2)',일반:'var(--border)'};
+        return `<a href="https://clify.daouoffice.com${m.url||'/gw/app/mail'}" target="_blank" class="feed-item" style="border-left:2px solid ${tagColors[m.tag]||'var(--border)'}"><div><div class="feed-item-text">${escHtml(m.subject)}</div><div class="feed-item-meta">${m.from||''} · ${m.tag||''}</div></div></a>`;
+      }).join('');
+    }else{mlEl.innerHTML='<div class="feed-empty">읽지않은 메일 없음</div>';}
+  });
+}
+function loadGmailFeed(){
+  if(!firebaseRef)return;
+  firebase.database().ref('commandCenter/_gmailFeed').on('value',s=>{
+    const d=s.val();
+    const el=document.getElementById('gmailUnreadList');
+    const dtEl=document.getElementById('gmailDigestDate');
+    if(!d||!d.messages||!d.messages.length){
+      el.innerHTML='<div class="feed-empty">읽지않은 메일 없음</div>';
+      if(d&&d.updatedAt){const dt=new Date(d.updatedAt);dtEl.textContent=`${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')} 업데이트`;}
+      return;
+    }
+    if(d.updatedAt){const dt=new Date(d.updatedAt);dtEl.textContent=`${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')} 업데이트`;}
+    el.innerHTML=d.messages.map(m=>{
+      const acctColor=m.account==='jyh150701'?'var(--accent)':m.account==='jyh230901'?'var(--accent2)':'var(--accent5)';
+      return `<a href="${m.url||'https://mail.google.com'}" target="_blank" class="feed-item" style="border-left:2px solid ${acctColor}"><div style="flex:1"><div class="feed-item-text">${escHtml(m.subject||'(제목없음)')}</div><div class="feed-item-meta">${m.from||''} · ${m.account||''} · ${m.date||''}</div></div></a>`;
+    }).join('');
+  });
 }
 
 // ===== GOOGLE CALENDAR API → TIME BLOCK =====
