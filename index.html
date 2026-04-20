@@ -396,6 +396,8 @@
       <button class="top-tab" data-page="daily" onclick="switchPage('daily')">일일업무보고</button>
       <button class="top-tab" data-page="weekly" onclick="switchPage('weekly')">주간업무보고</button>
       <button class="top-tab" data-page="okr" onclick="switchPage('okr')">OKR</button>
+      <button class="top-tab" data-page="contacts" onclick="switchPage('contacts')">Contacts</button>
+      <button class="top-tab" data-page="decisions" onclick="switchPage('decisions')">Decisions</button>
       <button class="top-tab" data-page="captable" onclick="switchPage('captable')">Cap Table</button>
       <button class="top-tab" data-page="finance" onclick="switchPage('finance')">재무보고</button>
     </div>
@@ -465,8 +467,6 @@
         <button class="right-tab" data-rtab="calendar" onclick="switchRightTab('calendar')">Calendar</button>
         <button class="right-tab" data-rtab="feed" onclick="switchRightTab('feed')">Feed</button>
         <button class="right-tab active" data-rtab="slack" onclick="switchRightTab('slack')">Slack</button>
-        <button class="right-tab" data-rtab="decisions" onclick="switchRightTab('decisions')">Decisions</button>
-        <button class="right-tab" data-rtab="contacts" onclick="switchRightTab('contacts')">Contacts</button>
       </div>
       <div class="right-panel" id="panelMemo">
         <div style="padding:6px 14px;font-size:10px;color:var(--text-dim);text-align:right;border-bottom:1px solid var(--border)" id="memoCharCount">0자</div>
@@ -517,41 +517,6 @@
         </div>
       </div>
       <!-- DECISIONS PANEL -->
-      <div class="right-panel" id="panelDecisions">
-        <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
-          <div class="feed-section-title" style="margin:0">&#128221; Decision Log</div>
-          <button class="card-add" onclick="toggleDecisionForm()" title="Add Decision">+</button>
-        </div>
-        <div id="decisionForm" class="rp-inline-form" style="display:none">
-          <input id="decTitle" placeholder="결정 제목">
-          <textarea id="decContext" placeholder="맥락/근거"></textarea>
-          <div class="rp-form-row">
-            <select id="decCategory"><option value="투자">투자</option><option value="인사">인사</option><option value="전략">전략</option><option value="운영">운영</option><option value="기타">기타</option></select>
-            <button class="btn" style="background:var(--accent);color:#fff;border-color:var(--accent);flex:1" onclick="saveDecision()">저장</button>
-            <button class="btn" onclick="toggleDecisionForm()">취소</button>
-          </div>
-        </div>
-        <div id="decisionList"></div>
-      </div>
-      <!-- CONTACTS PANEL -->
-      <div class="right-panel" id="panelContacts">
-        <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
-          <div class="feed-section-title" style="margin:0">&#128100; Key Contacts</div>
-          <button class="card-add" onclick="toggleContactForm()" title="Add Contact">+</button>
-        </div>
-        <div style="padding:6px 12px"><input class="rp-search" id="contactSearch" placeholder="이름, 조직 검색..." oninput="renderContacts()"></div>
-        <div id="contactForm" class="rp-inline-form" style="display:none">
-          <div class="rp-form-row"><input id="ctName" placeholder="이름" style="flex:1"><input id="ctOrg" placeholder="조직" style="flex:1"></div>
-          <div class="rp-form-row"><input id="ctRole" placeholder="직함" style="flex:1"><input id="ctPhone" placeholder="전화" style="flex:1"></div>
-          <div class="rp-form-row"><input id="ctEmail" placeholder="이메일" style="flex:1"><select id="ctType"><option value="투자자">투자자</option><option value="파트너">파트너</option><option value="임원">임원</option><option value="기타">기타</option></select></div>
-          <textarea id="ctNotes" placeholder="메모 / 다음 액션"></textarea>
-          <div class="rp-form-row">
-            <button class="btn" style="background:var(--accent);color:#fff;border-color:var(--accent);flex:1" onclick="saveContact()">저장</button>
-            <button class="btn" onclick="toggleContactForm()">취소</button>
-          </div>
-        </div>
-        <div id="contactList"></div>
-      </div>
     </div>
   </div>
   <div class="week-view" id="weekView"></div>
@@ -608,6 +573,56 @@
       <button class="btn" style="background:var(--accent);color:#fff;border-color:var(--accent)" onclick="addOkrObjective()">+ Objective</button>
     </div>
     <div id="okrList"></div>
+  </div>
+</div>
+
+<!-- ===== PAGE: CONTACTS (Full Page) ===== -->
+<div class="page" id="page-contacts">
+  <div class="page-header">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:14px;font-weight:700">&#128100; Key Contacts</span>
+      <input class="rp-search" id="contactSearch" placeholder="이름, 조직 검색..." oninput="renderContacts()" style="width:220px">
+    </div>
+    <div class="page-actions">
+      <button class="btn" style="background:var(--accent);color:#fff;border-color:var(--accent)" onclick="toggleContactForm()">+ 연락처 추가</button>
+    </div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:16px">
+    <div id="contactForm" class="rp-inline-form" style="display:none;max-width:600px;margin:0 auto 16px">
+      <div class="rp-form-row"><input id="ctName" placeholder="이름" style="flex:1"><input id="ctOrg" placeholder="조직" style="flex:1"></div>
+      <div class="rp-form-row"><input id="ctRole" placeholder="직함" style="flex:1"><input id="ctPhone" placeholder="전화" style="flex:1"></div>
+      <div class="rp-form-row"><input id="ctEmail" placeholder="이메일" style="flex:1"><select id="ctType"><option value="투자자">투자자</option><option value="파트너">파트너</option><option value="임원">임원</option><option value="기타">기타</option></select></div>
+      <textarea id="ctNotes" placeholder="메모 / 다음 액션"></textarea>
+      <div class="rp-form-row">
+        <button class="btn" style="background:var(--accent);color:#fff;border-color:var(--accent);flex:1" onclick="saveContact()">저장</button>
+        <button class="btn" onclick="toggleContactForm()">취소</button>
+      </div>
+    </div>
+    <div id="contactList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px"></div>
+  </div>
+</div>
+
+<!-- ===== PAGE: DECISIONS (Full Page) ===== -->
+<div class="page" id="page-decisions">
+  <div class="page-header">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:14px;font-weight:700">&#128221; Decision Log</span>
+    </div>
+    <div class="page-actions">
+      <button class="btn" style="background:var(--accent);color:#fff;border-color:var(--accent)" onclick="toggleDecisionForm()">+ 의사결정 추가</button>
+    </div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:16px">
+    <div id="decisionForm" class="rp-inline-form" style="display:none;max-width:600px;margin:0 auto 16px">
+      <input id="decTitle" placeholder="결정 제목">
+      <textarea id="decContext" placeholder="맥락/근거"></textarea>
+      <div class="rp-form-row">
+        <select id="decCategory"><option value="투자">투자</option><option value="인사">인사</option><option value="전략">전략</option><option value="운영">운영</option><option value="기타">기타</option></select>
+        <button class="btn" style="background:var(--accent);color:#fff;border-color:var(--accent);flex:1" onclick="saveDecision()">저장</button>
+        <button class="btn" onclick="toggleDecisionForm()">취소</button>
+      </div>
+    </div>
+    <div id="decisionList" style="max-width:800px;margin:0 auto"></div>
   </div>
 </div>
 
@@ -841,6 +856,8 @@ function switchPage(p){
   else if(p==='weekly')loadWeekly();
   else if(p==='okr')renderOkrPage();
   else if(p==='finance')loadFinancePage();
+  else if(p==='contacts')renderContacts();
+  else if(p==='decisions')renderDecisions();
 }
 
 // ===== RIGHT PANEL TABS =====
@@ -1741,17 +1758,22 @@ function deleteDecision(id){
 function renderDecisions(){
   const el=document.getElementById('decisionList');
   const sorted=[...decisionsData].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  if(!sorted.length){el.innerHTML='<div class="feed-empty">등록된 결정 없음</div>';return;}
-  const catClass={'투자':'rp-tag-invest','인사':'rp-tag-hr','전략':'rp-tag-strategy','운영':'rp-tag-ops','기타':'rp-tag-etc'};
+  if(!sorted.length){el.innerHTML='<div class="feed-empty" style="padding:40px">등록된 결정 없음</div>';return;}
+  const catColors={'투자':'var(--accent)','인사':'var(--accent2)','전략':'var(--accent5)','운영':'var(--accent3)','기타':'var(--text-dim)'};
   el.innerHTML=sorted.map(d=>{
-    return `<div class="rp-list-item">
-      <div class="rp-item-title">${escHtml(d.title)}</div>
-      ${d.context?`<div style="font-size:11px;color:var(--text-dim);margin:3px 0;line-height:1.4">${escHtml(d.context).slice(0,120)}${(d.context||'').length>120?'...':''}</div>`:''}
-      <div class="rp-item-meta">
-        <span>${d.date||'-'}</span>
-        <span class="rp-tag ${catClass[d.category]||'rp-tag-etc'}">${d.category||'기타'}</span>
-        <span style="cursor:pointer;color:var(--accent)" onclick="editDecision(${d.id})">편집</span>
-        <span style="cursor:pointer;color:var(--danger)" onclick="deleteDecision(${d.id})">삭제</span>
+    const cc=catColors[d.category]||'var(--text-dim)';
+    return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:var(--sh-sm);border-left:3px solid ${cc}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px">
+        <div style="font-size:15px;font-weight:700;flex:1">${escHtml(d.title)}</div>
+        <span style="font-size:10px;padding:2px 10px;border-radius:10px;background:${cc}22;color:${cc};font-weight:600;white-space:nowrap">${d.category||'기타'}</span>
+      </div>
+      ${d.context?`<div style="font-size:12px;color:var(--text);background:var(--surface2);padding:10px 12px;border-radius:8px;margin-bottom:10px;line-height:1.6">${escHtml(d.context)}</div>`:''}
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text-dim)">
+        <span>📅 ${d.date||'-'}</span>
+        <div style="display:flex;gap:10px">
+          <span style="cursor:pointer;color:var(--accent)" onclick="editDecision(${d.id})">편집</span>
+          <span style="cursor:pointer;color:var(--danger)" onclick="deleteDecision(${d.id})">삭제</span>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -1814,19 +1836,31 @@ function renderContacts(){
   let filtered=contactsData;
   if(q)filtered=contactsData.filter(c=>(c.name||'').toLowerCase().includes(q)||(c.org||'').toLowerCase().includes(q)||(c.role||'').toLowerCase().includes(q));
   const sorted=[...filtered].sort((a,b)=>(b.lastContact||'').localeCompare(a.lastContact||''));
-  if(!sorted.length){el.innerHTML='<div class="feed-empty">등록된 연락처 없음</div>';return;}
-  const typeClass={'투자자':'rp-tag-investor','파트너':'rp-tag-partner','임원':'rp-tag-exec','기타':'rp-tag-other'};
+  if(!sorted.length){el.innerHTML='<div class="feed-empty" style="grid-column:1/-1;padding:40px">등록된 연락처 없음</div>';return;}
+  const typeColors={'투자자':'var(--accent)','파트너':'var(--accent5)','임원':'var(--accent2)','기타':'var(--text-dim)'};
   el.innerHTML=sorted.map(c=>{
-    return `<div class="rp-list-item">
-      <div class="rp-item-title">${escHtml(c.name)} <span style="font-size:10px;color:var(--text-dim);font-weight:400">${escHtml(c.org||'')} ${escHtml(c.role||'')}</span></div>
-      ${c.notes?`<div style="font-size:10px;color:var(--text-dim);margin:2px 0">${escHtml(c.notes).slice(0,80)}${(c.notes||'').length>80?'...':''}</div>`:''}
-      <div class="rp-item-meta">
-        ${c.phone?`<span>&#128222; ${escHtml(c.phone)}</span>`:''}
-        ${c.email?`<span>&#9993; ${escHtml(c.email)}</span>`:''}
-        <span class="rp-tag ${typeClass[c.type]||'rp-tag-other'}">${c.type||'기타'}</span>
-        <span style="font-size:9px">${c.lastContact||'-'}</span>
-        <span style="cursor:pointer;color:var(--accent)" onclick="editContact(${c.id})">편집</span>
-        <span style="cursor:pointer;color:var(--danger)" onclick="deleteContact(${c.id})">삭제</span>
+    const tc=typeColors[c.type]||'var(--text-dim)';
+    const initials=(c.name||'?').slice(0,1);
+    return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:var(--sh-sm);border-left:3px solid ${tc}">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:36px;height:36px;border-radius:50%;background:${tc};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;flex-shrink:0">${initials}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(c.name)}</div>
+          <div style="font-size:11px;color:var(--text-dim)">${escHtml(c.org||'')} ${c.role?'· '+escHtml(c.role):''}</div>
+        </div>
+        <span style="font-size:10px;padding:2px 8px;border-radius:10px;background:${tc}22;color:${tc};font-weight:600">${c.type||'기타'}</span>
+      </div>
+      ${c.phone||c.email?`<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px;font-size:11px;color:var(--text-dim)">
+        ${c.phone?`<span>📞 ${escHtml(c.phone)}</span>`:''}
+        ${c.email?`<span>✉ ${escHtml(c.email)}</span>`:''}
+      </div>`:''}
+      ${c.notes?`<div style="font-size:11px;color:var(--text);background:var(--surface2);padding:8px 10px;border-radius:6px;margin-bottom:8px;line-height:1.5">${escHtml(c.notes)}</div>`:''}
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:var(--text-dim)">
+        <span>최근 연락: ${c.lastContact||'-'}</span>
+        <div style="display:flex;gap:8px">
+          <span style="cursor:pointer;color:var(--accent)" onclick="editContact(${c.id})">편집</span>
+          <span style="cursor:pointer;color:var(--danger)" onclick="deleteContact(${c.id})">삭제</span>
+        </div>
       </div>
     </div>`;
   }).join('');
