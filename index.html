@@ -1120,17 +1120,19 @@ function initFirebase(){
   const c=getFirebaseConfig();if(!c){updateSyncUI('local');return;}
   try{
     if(!firebase.apps.length)firebase.initializeApp({apiKey:c.apiKey,databaseURL:c.dbUrl,projectId:c.projectId});
-    // FEATURE 9: Anonymous Auth
-    firebase.auth().signInAnonymously().then(cred=>{
-      firebaseAuthUid=cred.user.uid;
-      const authEl=document.getElementById('setupAuthStatus');
-      if(authEl)authEl.textContent='Anonymous ('+firebaseAuthUid.slice(0,8)+'...)';
-    }).catch(e=>{
-      console.warn('Auth failed, continuing without auth:',e.message);
-      const authEl=document.getElementById('setupAuthStatus');
-      if(authEl)authEl.textContent='Auth disabled';
-    });
     firebaseDb=firebase.database();firebaseRef=firebaseDb.ref('commandCenter');
+    // FEATURE 9: Anonymous Auth (optional - doesn't block DB if auth fails)
+    try{
+      firebase.auth().signInAnonymously().then(cred=>{
+        firebaseAuthUid=cred.user.uid;
+        const authEl=document.getElementById('setupAuthStatus');
+        if(authEl)authEl.textContent='Anonymous ('+firebaseAuthUid.slice(0,8)+'...)';
+      }).catch(e=>{
+        console.warn('Auth skipped:',e.message);
+        const authEl=document.getElementById('setupAuthStatus');
+        if(authEl)authEl.textContent='Auth disabled (DB still works)';
+      });
+    }catch(e){console.warn('Auth not available');}
     firebaseRef.on('child_changed',s=>{
       const key=s.key,val=s.val();
       if(key.startsWith('_'))return;
@@ -1142,6 +1144,10 @@ function initFirebase(){
         data[key]=val;saveLocalData();
         if(currentPage==='dashboard'){
           if(currentView==='day'&&dateKey()===key){loadDayData();fetchGcalEvents();}
+          else if(currentView==='day'&&key<dateKey()){
+            // A PREVIOUS day was updated on another device — revalidate carry-over for current day
+            revalidateCarryOver();
+          }
           else if(currentView==='week')renderWeekView();
           else if(currentView==='month')renderMonthView();
         }
