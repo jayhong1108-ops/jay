@@ -327,11 +327,16 @@
 
   /* === MOBILE === */
   @media(max-width:1024px){
-    .main{grid-template-columns:1fr;height:auto;flex:unset}
-    .schedule-col{border-right:none;border-bottom:1px solid var(--border);max-height:280px}
-    .right-col{border-left:none;border-top:1px solid var(--border)}
-    .task-grid{grid-template-columns:1fr}
+    .page{height:auto;min-height:calc(100vh - 48px);overflow-y:auto}
+    .main{grid-template-columns:1fr;height:auto;flex:unset;overflow:visible}
+    .schedule-col{border-right:none;border-bottom:1px solid var(--border);max-height:none;overflow:visible;grid-row:auto}
+    .schedule-col .time-slots{max-height:200px;overflow-y:auto}
+    .center-area{grid-row:auto;min-height:400px;overflow:visible}
+    .task-grid{grid-template-columns:1fr 1fr}
+    .right-col{border-left:none;border-top:1px solid var(--border);grid-row:auto;min-height:300px;overflow:visible}
+    .right-panel.active{min-height:250px}
     .week-grid{grid-template-columns:repeat(3,1fr)}
+    .card-body{min-height:80px}
   }
   @media(max-width:768px){
     .top-nav{padding:0 10px;height:44px;gap:8px}
@@ -340,9 +345,13 @@
     .top-tab{padding:5px 10px;font-size:11px}
     .header{padding:6px 12px}
     .header-center{order:3;width:100%;justify-content:center}
-    .stats-bar{padding:6px 12px;gap:6px}
-    .center-area{padding:10px}
+    .stats-bar{padding:6px 12px;gap:6px;flex-wrap:wrap}
+    .center-area{padding:10px;min-height:350px}
     .task-grid{grid-template-columns:1fr;gap:10px}
+    .card{min-height:120px}
+    .card-body{min-height:60px;max-height:none}
+    .schedule-col .time-slots{max-height:160px}
+    .right-col{min-height:250px}
     .week-grid{grid-template-columns:1fr 1fr;gap:6px}
     .week-day-col{min-height:200px}
     .month-cell{min-height:50px;padding:4px;border-radius:6px}
@@ -354,10 +363,25 @@
     .date-display{min-width:120px;font-size:12px}
     .btn{padding:4px 8px;font-size:11px}
     .notif-dropdown{width:280px;right:-40px}
+    .right-tabs{flex-wrap:wrap;gap:0}
+    .right-tab{padding:6px 3px;font-size:9px;letter-spacing:0}
+    .trend-chart{height:70px}
+    .trend-bar-label{font-size:7px}
+    .review-stat-grid{grid-template-columns:repeat(2,1fr)}
+    .okr-page{padding:12px}
+    .okr-card{padding:12px}
+    .search-box{width:95vw}
+    .qc-modal{width:95vw}
   }
   @media(max-width:480px){
     .brand{display:none}
+    .task-grid{grid-template-columns:1fr}
     .week-grid{grid-template-columns:1fr}
+    .top-tabs{gap:0}
+    .top-tab{padding:4px 7px;font-size:10px}
+    .review-stat-grid{grid-template-columns:1fr 1fr}
+    .header-left{flex-wrap:wrap}
+    .date-nav{flex-wrap:wrap;justify-content:center}
   }
 </style>
 </head>
