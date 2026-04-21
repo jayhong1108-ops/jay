@@ -149,6 +149,8 @@
   .status-pending{background:rgba(245,158,11,.15);color:var(--accent3)}
   .status-done{background:rgba(34,197,94,.15);color:var(--success)}
   .status-waiting{background:rgba(168,85,247,.15);color:var(--accent2)}
+  .directive-due{-webkit-appearance:none;appearance:none}
+  .directive-due::-webkit-calendar-picker-indicator{filter:invert(.7);cursor:pointer}
 
   /* RIGHT COLUMN - TABBED */
   .right-col{grid-row:1/-1;border-left:1px solid var(--border);display:flex;flex-direction:column;background:var(--surface);min-height:0}
@@ -1269,13 +1271,22 @@ function addTask(s){const l=document.getElementById(s+'List'),item=createTaskIte
 function createTaskItem(s,td){const div=document.createElement('div');div.className='task-item'+(td.carried?' carried-over':'');let carry=td.carried?`<span class="carry-tag">↻${td.carriedFrom||''}</span>`:'';div.innerHTML=`<div class="task-check ${td.done?'checked':''}" onclick="toggleCheck(this)"></div><span class="task-priority priority-${td.priority}" onclick="cyclePriority(this)">${td.priority==='high'?'!!!':td.priority==='mid'?'!!':'!'}</span><textarea class="task-text ${td.done?'completed':''}" rows="1" oninput="autoResize(this);debounceSave()" onblur="debounceSave()" onkeydown="handleTaskKey(event,'${s}')" placeholder="할 일 입력...">${td.text}</textarea>${carry}<button class="task-delete" onclick="deleteTask(this)">✕</button>`;setTimeout(()=>autoResize(div.querySelector('.task-text')),0);return div;}
 function toggleCheck(el){el.classList.toggle('checked');el.parentElement.querySelector('.task-text').classList.toggle('completed');updateCounts();debounceSave();}
 function cyclePriority(el){const c=el.classList.contains('priority-high')?'high':el.classList.contains('priority-mid')?'mid':'low';const n=P_CY[(P_CY.indexOf(c)+1)%3];el.className=`task-priority priority-${n}`;el.textContent=n==='high'?'!!!':n==='mid'?'!!':'!';debounceSave();}
-function deleteTask(el){el.parentElement.remove();updateCounts();debounceSave();}
+function deleteTask(el){
+  const text=el.parentElement.querySelector('.task-text').value.trim();
+  if(text){
+    const key=dateKey();
+    let dismissed=JSON.parse(localStorage.getItem('dcc-dismissed-'+key)||'[]');
+    if(!dismissed.includes(text)){dismissed.push(text);localStorage.setItem('dcc-dismissed-'+key,JSON.stringify(dismissed));}
+  }
+  el.parentElement.remove();updateCounts();debounceSave();
+}
 function handleTaskKey(e,s){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();addTask(s);}}
 function autoResize(el){el.style.height='auto';el.style.height=el.scrollHeight+'px';}
 
 // ===== DIRECTIVES =====
 function addDirective(){const l=document.getElementById('directiveList'),item=createDirectiveItem({text:'',assignee:'',status:'pending',carried:false});l.appendChild(item);item.querySelector('.directive-text').focus();updateCounts();}
-function createDirectiveItem(d){const div=document.createElement('div');div.className='directive-item'+(d.carried?' carried-over':'');const sl=d.status==='done'?'완료':d.status==='waiting'?'대기':'진행중';let carry=d.carried?'<span class="carry-tag">↻</span>':'';div.innerHTML=`<span class="directive-status status-${d.status}" onclick="cycleStatus(this)">${sl}</span><textarea class="task-text directive-text" rows="1" oninput="autoResize(this);debounceSave()" onblur="debounceSave()" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();addDirective()}" placeholder="지시사항...">${d.text}</textarea><input type="text" value="${d.assignee||''}" placeholder="담당자" style="width:50px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:2px 5px;border-radius:4px;font-size:10px;text-align:center" oninput="debounceSave()">${carry}<button class="task-delete" onclick="this.parentElement.remove();updateCounts();debounceSave()">✕</button>`;setTimeout(()=>autoResize(div.querySelector('.directive-text')),0);return div;}
+function createDirectiveItem(d){const div=document.createElement('div');div.className='directive-item'+(d.carried?' carried-over':'');const sl=d.status==='done'?'완료':d.status==='waiting'?'대기':'진행중';let carry=d.carried?'<span class="carry-tag">↻</span>':'';const dueVal=d.dueDate||'';const dueW=dueVal?'100px':'28px';const dueStyle=dueVal&&new Date(dueVal)<new Date(new Date().toDateString())?'color:var(--danger);font-weight:700':'';div.innerHTML=`<span class="directive-status status-${d.status}" onclick="cycleStatus(this)">${sl}</span><textarea class="task-text directive-text" rows="1" oninput="autoResize(this);debounceSave()" onblur="debounceSave()" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();addDirective()}" placeholder="지시사항...">${d.text}</textarea><input type="text" value="${d.assignee||''}" placeholder="담당자" style="width:50px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:2px 5px;border-radius:4px;font-size:10px;text-align:center" oninput="debounceSave()"><input type="date" class="directive-due" value="${dueVal}" title="Due Date" style="width:${dueW};background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:2px 3px;border-radius:4px;font-size:9px;cursor:pointer;${dueStyle}" onchange="onDueDateChange(this);debounceSave()">${carry}<button class="task-delete" onclick="this.parentElement.remove();updateCounts();debounceSave()">✕</button>`;setTimeout(()=>autoResize(div.querySelector('.directive-text')),0);return div;}
+function onDueDateChange(el){const v=el.value;el.style.width=v?'100px':'28px';if(v&&new Date(v)<new Date(new Date().toDateString())){el.style.color='var(--danger)';el.style.fontWeight='700';}else{el.style.color='var(--text)';el.style.fontWeight='normal';}}
 function cycleStatus(el){const c=el.classList.contains('status-done')?'done':el.classList.contains('status-waiting')?'waiting':'pending';const n=S_CY[(S_CY.indexOf(c)+1)%3];el.className=`directive-status status-${n}`;el.textContent=n==='done'?'완료':n==='waiting'?'대기':'진행중';debounceSave();}
 function onMemoInput(){document.getElementById('memoCharCount').textContent=document.getElementById('memoArea').value.length+'자';debounceSave();}
 
@@ -1386,7 +1397,7 @@ function saveDayData(){
   const key=dateKey(),dd={tasks:{},schedule:{},directives:[],memo:''};
   ['business','personal','progress'].forEach(s=>{dd.tasks[s]=[];document.getElementById(s+'List').querySelectorAll('.task-item').forEach(item=>{const text=item.querySelector('.task-text').value;if(text.trim()||document.activeElement===item.querySelector('.task-text')){const pEl=item.querySelector('.task-priority'),p=pEl.classList.contains('priority-high')?'high':pEl.classList.contains('priority-mid')?'mid':'low';dd.tasks[s].push({text,done:item.querySelector('.task-check').classList.contains('checked'),priority:p,carried:item.classList.contains('carried-over'),carriedFrom:item.querySelector('.carry-tag')?.textContent.replace('↻','')||''});}});});
   document.querySelectorAll('.time-content').forEach(el=>{const c=el.textContent.trim();if(c&&!el.dataset.gcal)dd.schedule[el.dataset.time]=c;});
-  document.getElementById('directiveList').querySelectorAll('.directive-item').forEach(item=>{const text=item.querySelector('.directive-text').value;if(text.trim()||document.activeElement===item.querySelector('.directive-text')){const sEl=item.querySelector('.directive-status'),st=sEl.classList.contains('status-done')?'done':sEl.classList.contains('status-waiting')?'waiting':'pending';dd.directives.push({text,assignee:item.querySelector('input[type="text"]').value,status:st,carried:item.classList.contains('carried-over')});}});
+  document.getElementById('directiveList').querySelectorAll('.directive-item').forEach(item=>{const text=item.querySelector('.directive-text').value;if(text.trim()||document.activeElement===item.querySelector('.directive-text')){const sEl=item.querySelector('.directive-status'),st=sEl.classList.contains('status-done')?'done':sEl.classList.contains('status-waiting')?'waiting':'pending';const dueEl=item.querySelector('.directive-due');dd.directives.push({text,assignee:item.querySelector('input[type="text"]').value,status:st,carried:item.classList.contains('carried-over'),dueDate:dueEl?dueEl.value:''});}});
   dd.memo=document.getElementById('memoArea').value;dd.lastModified=new Date().toISOString();data[key]=dd;saveLocalData();
   if(firebaseRef){_lastPushedKey=key;firebaseRef.child(key).set(dd);}
 }
@@ -1557,7 +1568,9 @@ function deleteRecurringTask(id){let tasks=getRecurringTasks();tasks=tasks.filte
 function renderRecurringList(){const tasks=getRecurringTasks().filter(t=>t.section===recurringSection),el=document.getElementById('recurringList');const dayNames=['일','월','화','수','목','금','토'];if(!tasks.length){el.innerHTML='<div style="font-size:11px;color:var(--text-dim);padding:4px">등록된 반복 태스크 없음</div>';return;}
   el.innerHTML=tasks.map(t=>{const dStr=t.freq==='daily'?'매일':t.freq==='weekdays'?'평일':t.days.map(d=>dayNames[d]).join(',');const pStr=t.priority==='high'?'!!!':t.priority==='mid'?'!!':'!';return`<div style="display:flex;align-items:center;gap:6px;padding:5px 8px;background:var(--surface2);border-radius:6px"><span style="font-size:10px;color:var(--accent5)">${pStr}</span><span style="flex:1;font-size:11px">${t.text}</span><span style="font-size:9px;color:var(--text-dim);white-space:nowrap">${dStr}</span><button onclick="deleteRecurringTask(${t.id})" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:10px">✕</button></div>`;}).join('');}
 function applyRecurringTasks(){const key=dateKey(),dayData=data[key];const tasks=getRecurringTasks();if(!tasks.length)return;const dow=currentDate.getDay();const applicable=tasks.filter(t=>t.days.includes(dow));if(!applicable.length)return;
+  const dismissed=JSON.parse(localStorage.getItem('dcc-dismissed-'+key)||'[]');
   applicable.forEach(rt=>{const section=rt.section;
+    if(dismissed.includes(rt.text))return;
     const saved=dayData&&dayData.tasks&&dayData.tasks[section]?dayData.tasks[section]:[];
     if(saved.some(t=>t.text===rt.text))return;
     const domTexts=[];document.getElementById(section+'List').querySelectorAll('.task-text').forEach(el=>domTexts.push(el.value||el.textContent));
