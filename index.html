@@ -1285,7 +1285,12 @@ function autoResize(el){el.style.height='auto';el.style.height=el.scrollHeight+'
 
 // ===== DIRECTIVES =====
 function addDirective(){const l=document.getElementById('directiveList'),item=createDirectiveItem({text:'',assignee:'',status:'pending',carried:false});l.appendChild(item);item.querySelector('.directive-text').focus();updateCounts();}
-function createDirectiveItem(d){const div=document.createElement('div');div.className='directive-item'+(d.carried?' carried-over':'');const sl=d.status==='done'?'완료':d.status==='waiting'?'대기':'진행중';let carry=d.carried?'<span class="carry-tag">↻</span>':'';const dueVal=d.dueDate||'';const dueW=dueVal?'100px':'28px';const dueStyle=dueVal&&new Date(dueVal)<new Date(new Date().toDateString())?'color:var(--danger);font-weight:700':'';div.innerHTML=`<span class="directive-status status-${d.status}" onclick="cycleStatus(this)">${sl}</span><textarea class="task-text directive-text" rows="1" oninput="autoResize(this);debounceSave()" onblur="debounceSave()" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();addDirective()}" placeholder="지시사항...">${d.text}</textarea><input type="text" value="${d.assignee||''}" placeholder="담당자" style="width:50px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:2px 5px;border-radius:4px;font-size:10px;text-align:center" oninput="debounceSave()"><input type="date" class="directive-due" value="${dueVal}" title="Due Date" style="width:${dueW};background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:2px 3px;border-radius:4px;font-size:9px;cursor:pointer;${dueStyle}" onchange="onDueDateChange(this);debounceSave()">${carry}<button class="task-delete" onclick="this.parentElement.remove();updateCounts();debounceSave()">✕</button>`;setTimeout(()=>autoResize(div.querySelector('.directive-text')),0);return div;}
+function createDirectiveItem(d){const div=document.createElement('div');div.className='directive-item'+(d.carried?' carried-over':'');const sl=d.status==='done'?'완료':d.status==='waiting'?'대기':'진행중';let carry=d.carried?'<span class="carry-tag">↻</span>':'';const dueVal=d.dueDate||'';const dueW=dueVal?'100px':'28px';const dueStyle=dueVal&&new Date(dueVal)<new Date(new Date().toDateString())?'color:var(--danger);font-weight:700':'';div.innerHTML=`<span class="directive-status status-${d.status}" onclick="cycleStatus(this)">${sl}</span><textarea class="task-text directive-text" rows="1" oninput="autoResize(this);debounceSave()" onblur="debounceSave()" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();addDirective()}" placeholder="지시사항...">${d.text}</textarea><input type="text" value="${d.assignee||''}" placeholder="담당자" style="width:50px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:2px 5px;border-radius:4px;font-size:10px;text-align:center" oninput="debounceSave()"><input type="date" class="directive-due" value="${dueVal}" title="Due Date" style="width:${dueW};background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:2px 3px;border-radius:4px;font-size:9px;cursor:pointer;${dueStyle}" onchange="onDueDateChange(this);debounceSave()">${carry}<button class="task-delete" style="opacity:.7;flex-shrink:0" onclick="deleteDirective(this)">✕</button>`;setTimeout(()=>autoResize(div.querySelector('.directive-text')),0);return div;}
+function deleteDirective(el){
+  const text=(el.parentElement.querySelector('.directive-text').value||'').trim();
+  if(text){const key=dateKey();let dismissed=JSON.parse(localStorage.getItem('dcc-dismissed-'+key)||'[]');if(!dismissed.includes(text)){dismissed.push(text);localStorage.setItem('dcc-dismissed-'+key,JSON.stringify(dismissed));}}
+  el.parentElement.remove();updateCounts();debounceSave();
+}
 function onDueDateChange(el){const v=el.value;el.style.width=v?'100px':'28px';if(v&&new Date(v)<new Date(new Date().toDateString())){el.style.color='var(--danger)';el.style.fontWeight='700';}else{el.style.color='var(--text)';el.style.fontWeight='normal';}}
 function cycleStatus(el){const c=el.classList.contains('status-done')?'done':el.classList.contains('status-waiting')?'waiting':'pending';const n=S_CY[(S_CY.indexOf(c)+1)%3];el.className=`directive-status status-${n}`;el.textContent=n==='done'?'완료':n==='waiting'?'대기':'진행중';debounceSave();}
 function onMemoInput(){document.getElementById('memoCharCount').textContent=document.getElementById('memoArea').value.length+'자';debounceSave();}
@@ -1320,11 +1325,12 @@ function mergeNewFromPrevDay(key,dayData){
   const dates=Object.keys(data).filter(k=>!k.startsWith('_')&&k<key).sort().reverse();
   if(!dates.length)return;const prevKey=dates[0];const pd=data[prevKey];
   if(!pd||!pd.tasks)return;
+  const dismissed=JSON.parse(localStorage.getItem('dcc-dismissed-'+key)||'[]');
   let changed=false;
   ['business','personal','progress'].forEach(s=>{
     const currentTexts=new Set((dayData.tasks&&dayData.tasks[s]||[]).map(t=>t.text));
     (pd.tasks[s]||[]).forEach(t=>{
-      if(!t.done&&t.text&&t.text.trim()&&!currentTexts.has(t.text)){
+      if(!t.done&&t.text&&t.text.trim()&&!currentTexts.has(t.text)&&!dismissed.includes(t.text)){
         if(!dayData.tasks)dayData.tasks={};if(!dayData.tasks[s])dayData.tasks[s]=[];
         const nt={text:t.text,done:false,priority:t.priority||'mid',carried:true,carriedFrom:prevKey.slice(5)};
         dayData.tasks[s].push(nt);
@@ -1336,7 +1342,7 @@ function mergeNewFromPrevDay(key,dayData){
   if(pd.directives){
     const curDirTexts=new Set((dayData.directives||[]).map(d=>d.text));
     pd.directives.forEach(d=>{
-      if(d.status!=='done'&&d.text&&d.text.trim()&&!curDirTexts.has(d.text)){
+      if(d.status!=='done'&&d.text&&d.text.trim()&&!curDirTexts.has(d.text)&&!dismissed.includes(d.text)){
         if(!dayData.directives)dayData.directives=[];
         const nd={...d,carried:true};dayData.directives.push(nd);
         document.getElementById('directiveList').appendChild(createDirectiveItem(nd));
@@ -1385,7 +1391,8 @@ function revalidateCarryOver(){
 }
 function getCarryOverTasks(){const key=dateKey();
   if(data[key]){let has=false;const ex=data[key];if(ex.tasks){['business','personal','progress'].forEach(s=>{if((ex.tasks[s]||[]).length)has=true;});}if((ex.directives||[]).length)has=true;if(has)return null;}
-  const dates=Object.keys(data).filter(k=>!k.startsWith('_')).sort().reverse();let prev=null;for(const dk of dates){if(dk<key){prev=dk;break;}}if(!prev)return null;const pd=data[prev];const carry={tasks:{},directives:[]};let has=false;if(pd.tasks){['business','personal','progress'].forEach(s=>{carry.tasks[s]=[];(pd.tasks[s]||[]).forEach(t=>{if(!t.done&&t.text&&t.text.trim()){carry.tasks[s].push({...t,carried:true,carriedFrom:prev.slice(5)});has=true;}});});}if(pd.directives){pd.directives.forEach(d=>{if(d.status!=='done'&&d.text&&d.text.trim()){carry.directives.push({...d,carried:true});has=true;}});}return has?carry:null;}
+  const dismissed=JSON.parse(localStorage.getItem('dcc-dismissed-'+key)||'[]');
+  const dates=Object.keys(data).filter(k=>!k.startsWith('_')).sort().reverse();let prev=null;for(const dk of dates){if(dk<key){prev=dk;break;}}if(!prev)return null;const pd=data[prev];const carry={tasks:{},directives:[]};let has=false;if(pd.tasks){['business','personal','progress'].forEach(s=>{carry.tasks[s]=[];(pd.tasks[s]||[]).forEach(t=>{if(!t.done&&t.text&&t.text.trim()&&!dismissed.includes(t.text)){carry.tasks[s].push({...t,carried:true,carriedFrom:prev.slice(5)});has=true;}});});}if(pd.directives){pd.directives.forEach(d=>{if(d.status!=='done'&&d.text&&d.text.trim()&&!dismissed.includes(d.text)){carry.directives.push({...d,carried:true});has=true;}});}return has?carry:null;}
 
 // ===== DATA =====
 function loadLocalData(){try{data=JSON.parse(localStorage.getItem(LOCAL_KEY))||{};}catch(e){data={};}}
