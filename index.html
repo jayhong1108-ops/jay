@@ -291,25 +291,7 @@
   .review-day-bar .bar{width:100%;border-radius:3px 3px 0 0;min-height:2px}
   .review-day-bar .day-lbl{font-size:9px;color:var(--text-dim)}
 
-  /* === OKR PAGE === */
-  .okr-page{flex:1;overflow-y:auto;padding:20px}
-  .okr-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-  .okr-month-sel{display:flex;align-items:center;gap:8px}
-  .okr-month-sel select{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:8px;font-size:13px;outline:none}
-  .okr-obj-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:var(--sh-sm)}
-  .okr-obj-title{font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
-  .okr-kr{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
-  .okr-kr:last-child{border-bottom:none}
-  .okr-kr-text{flex:1;font-size:13px}
-  .okr-kr-bar-wrap{width:120px;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;flex-shrink:0}
-  .okr-kr-bar{height:100%;border-radius:4px;transition:width .3s}
-  .okr-kr-pct{font-size:11px;font-weight:700;width:36px;text-align:right;flex-shrink:0}
-  .okr-obj-progress{margin-top:10px;display:flex;align-items:center;gap:10px}
-  .okr-obj-bar-wrap{flex:1;height:10px;background:var(--surface2);border-radius:5px;overflow:hidden}
-  .okr-obj-bar{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s}
-  .okr-obj-pct{font-size:14px;font-weight:700;width:44px;text-align:right}
-
-  /* === DECISION LOG / CONTACTS PANELS === */
+  /* === CONTACTS PANELS === */
   .rp-list-item{padding:10px 12px;border-bottom:1px solid var(--border);transition:background .15s}
   .rp-list-item:hover{background:var(--surface2)}
   .rp-list-item:last-child{border-bottom:none}
@@ -388,8 +370,6 @@
     .trend-chart{height:70px}
     .trend-bar-label{font-size:7px}
     .review-stat-grid{grid-template-columns:repeat(2,1fr)}
-    .okr-page{padding:12px}
-    .okr-card{padding:12px}
     .search-box{width:95vw}
     .qc-modal{width:95vw}
     .task-delete{opacity:.6}
@@ -415,9 +395,7 @@
       <button class="top-tab active" data-page="dashboard" onclick="switchPage('dashboard')">Daily Task</button>
       <button class="top-tab" data-page="daily" onclick="switchPage('daily')">일일업무보고</button>
       <button class="top-tab" data-page="weekly" onclick="switchPage('weekly')">주간업무보고</button>
-      <button class="top-tab" data-page="okr" onclick="switchPage('okr')">OKR</button>
       <button class="top-tab" data-page="contacts" onclick="switchPage('contacts')">Contacts</button>
-      <button class="top-tab" data-page="decisions" onclick="switchPage('decisions')">Decisions</button>
       <button class="top-tab" data-page="captable" onclick="switchPage('captable')">Cap Table</button>
       <button class="top-tab" data-page="finance" onclick="switchPage('finance')">재무보고</button>
     </div>
@@ -512,12 +490,6 @@
           <div style="padding:8px 0 4px;font-size:10px;font-weight:700;color:var(--text-dim);letter-spacing:.5px">&#128231; 읽지않은 메일</div>
           <div id="daouMailList"><div class="feed-empty">로딩 중...</div></div>
         </div>
-        <div class="feed-section">
-          <div class="feed-section-title">&#128231; Gmail 읽지않은 메일</div>
-          <div style="display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap" id="gmailAccountLinks"></div>
-          <div id="gmailUnreadList"><div class="feed-empty">로딩 중...</div></div>
-          <div id="gmailDigestDate" style="font-size:9px;color:var(--text-dim);text-align:right;padding-top:4px"></div>
-        </div>
       </div>
       <div class="right-panel active" id="panelSlack">
         <div class="feed-section" style="padding:8px 12px;display:flex;align-items:center;justify-content:space-between">
@@ -578,23 +550,6 @@
   <div class="iframe-page"><iframe id="weeklyIframe" allow="clipboard-read; clipboard-write"></iframe></div>
 </div>
 
-<!-- ===== PAGE: OKR ===== -->
-<div class="page" id="page-okr">
-  <div class="okr-page" id="okrPageContent">
-    <div class="okr-header">
-      <div style="display:flex;align-items:center;gap:10px">
-        <h2 style="font-size:18px;font-weight:700">&#127919; OKR / Monthly Goals</h2>
-        <div class="okr-month-sel">
-          <button class="btn" onclick="changeOkrMonth(-1)">&#9664;</button>
-          <select id="okrMonthSelect" onchange="loadOkrMonth(this.value)"></select>
-          <button class="btn" onclick="changeOkrMonth(1)">&#9654;</button>
-        </div>
-      </div>
-      <button class="btn" style="background:var(--accent);color:#fff;border-color:var(--accent)" onclick="addOkrObjective()">+ Objective</button>
-    </div>
-    <div id="okrList"></div>
-  </div>
-</div>
 
 <!-- ===== PAGE: CONTACTS (Full Page) ===== -->
 <div class="page" id="page-contacts">
@@ -622,29 +577,6 @@
   </div>
 </div>
 
-<!-- ===== PAGE: DECISIONS (Full Page) ===== -->
-<div class="page" id="page-decisions">
-  <div class="page-header">
-    <div style="display:flex;align-items:center;gap:10px">
-      <span style="font-size:14px;font-weight:700">&#128221; Decision Log</span>
-    </div>
-    <div class="page-actions">
-      <button class="btn" style="background:var(--accent);color:#fff;border-color:var(--accent)" onclick="toggleDecisionForm()">+ 의사결정 추가</button>
-    </div>
-  </div>
-  <div style="flex:1;overflow-y:auto;padding:16px">
-    <div id="decisionForm" class="rp-inline-form" style="display:none;max-width:600px;margin:0 auto 16px">
-      <input id="decTitle" placeholder="결정 제목">
-      <textarea id="decContext" placeholder="맥락/근거"></textarea>
-      <div class="rp-form-row">
-        <select id="decCategory"><option value="투자">투자</option><option value="인사">인사</option><option value="전략">전략</option><option value="운영">운영</option><option value="기타">기타</option></select>
-        <button class="btn" style="background:var(--accent);color:#fff;border-color:var(--accent);flex:1" onclick="saveDecision()">저장</button>
-        <button class="btn" onclick="toggleDecisionForm()">취소</button>
-      </div>
-    </div>
-    <div id="decisionList" style="max-width:800px;margin:0 auto"></div>
-  </div>
-</div>
 
 <!-- ===== PAGE: CAP TABLE ===== -->
 <div class="page" id="page-captable">
@@ -785,20 +717,6 @@
   </div>
 </div>
 
-<!-- OKR EDIT OVERLAY -->
-<div class="overlay" id="okrEditOverlay" onclick="if(event.target===this)closeOkrEdit()">
-  <div class="setup-modal" style="max-width:480px">
-    <h2 id="okrEditTitle">Objective</h2>
-    <input id="okrObjTitle" placeholder="Objective 제목" style="margin-bottom:10px">
-    <div id="okrKrInputs"></div>
-    <button class="btn" style="margin-top:6px" onclick="addOkrKrInput()">+ Key Result</button>
-    <div class="setup-actions" style="margin-top:12px">
-      <button class="btn" style="background:var(--accent);color:#fff;border-color:var(--accent)" onclick="saveOkrObjective()">저장</button>
-      <button class="btn" onclick="closeOkrEdit()">취소</button>
-    </div>
-  </div>
-</div>
-
 <input type="file" id="importInput" accept=".json" style="display:none" onchange="handleImport(event)">
 <div class="toast" id="toast"></div>
 
@@ -838,22 +756,19 @@ const WEEKLY_FOLDERS=[
 const WEEKLY_ROOT='1bZBPupbEjtaBRC5ZAM0lItcZtTOaJoJp';
 let currentWeeklyDept=0;
 
-// OKR state
-let okrData={};let currentOkrMonth='';let editingOkrIdx=-1;
-
-// Decisions & Contacts
-let decisionsData=[],contactsData=[];let editingDecisionId=null,editingContactId=null;
+// Contacts
+let contactsData=[];let editingContactId=null;
 
 // ===== INIT =====
 function init(){
   loadLocalData();seedInitialData();initFirebase();
   renderDateDisplay();buildTimeSlots();loadDayData();
   updateCurrentTimeIndicator();setInterval(updateCurrentTimeIndicator,60000);
-  loadCalendarEmbed();loadEmailLinks();loadDaouMail();loadGmailFeed();fetchGcalEvents();
+  loadCalendarEmbed();loadEmailLinks();loadDaouMail();fetchGcalEvents();
   loadSlackDigest();applyRecurringTasks();
   requestNotificationPermission();
-  initOkrMonth();loadFinancePage();
-  loadDecisions();loadContacts();
+  loadFinancePage();
+  loadContacts();
   registerServiceWorker();
   // 30초마다 자동저장 (안전망)
   setInterval(()=>{if(currentView==='day'&&currentPage==='dashboard')saveDayData();},30000);
@@ -875,7 +790,6 @@ function switchPage(p){
   document.querySelectorAll('.page').forEach(pg=>pg.classList.toggle('active',pg.id==='page-'+p));
   if(p==='daily')loadDaily();
   else if(p==='weekly')loadWeekly();
-  else if(p==='okr')renderOkrPage();
   else if(p==='finance')loadFinancePage();
   else if(p==='contacts')renderContacts();
   else if(p==='decisions')renderDecisions();
@@ -890,7 +804,7 @@ function switchRightTab(t){
   const panel=document.getElementById(panelId);
   if(panel)panel.classList.add('active');
   if(t==='calendar')loadCalendarEmbed();
-  if(t==='feed'){loadDaouMail();loadGmailFeed();}
+  if(t==='feed'){loadDaouMail();}
   if(t==='decisions')renderDecisions();
   if(t==='contacts')renderContacts();
 }
@@ -913,14 +827,10 @@ function loadCalendarEmbed(){
   if(!emails.length){wrap.innerHTML='<div class="cal-setup-msg" id="calSetupMsg">Google Calendar를 연동하려면<br>설정에서 캘린더 이메일을 입력하세요.<br><br><span style="font-size:11px;color:var(--text-dim)">설정 -> Google Calendar -> 이메일 입력</span></div>';return;}
   const allSources=[...emails,...SUB_CALENDARS];
   const srcParams=allSources.map(e=>'src='+encodeURIComponent(e)).join('&');
-  const url=`https://calendar.google.com/calendar/embed?${srcParams}&mode=AGENDA&ctz=Asia/Seoul&showTitle=0&showNav=1&showPrint=0&showCalendars=0&bgcolor=%23161625`;
-  wrap.innerHTML=`<iframe src="${url}" style="width:100%;height:100%;border:none;filter:invert(.88) hue-rotate(180deg);min-height:500px"></iframe>`;
+  const url=`https://calendar.google.com/calendar/embed?${srcParams}&mode=AGENDA&ctz=Asia/Seoul&showTitle=0&showNav=1&showPrint=0&showCalendars=0&bgcolor=%23f4f3ee`;
+  wrap.innerHTML=`<iframe src="${url}" style="width:100%;height:100%;border:none;min-height:500px"></iframe>`;
 }
-function loadEmailLinks(){
-  const c=getCalConfig(),el=document.getElementById('gmailAccountLinks'),emails=[c.cal1,c.cal2,c.cal3].filter(Boolean);
-  if(!emails.length){el.innerHTML='';return;}
-  el.innerHTML=emails.map(e=>`<a href="https://mail.google.com/mail/u/?authuser=${encodeURIComponent(e)}#inbox" target="_blank" class="feed-link-btn" style="padding:4px 8px;font-size:10px;flex-shrink:0">&#128231; ${e.split('@')[0]}</a>`).join('');
-}
+function loadEmailLinks(){}
 
 // ===== NOTIFICATIONS =====
 function requestNotificationPermission(){if('Notification' in window && Notification.permission==='default'){Notification.requestPermission();}}
@@ -961,25 +871,6 @@ function loadDaouMail(){
     }else{mlEl.innerHTML='<div class="feed-empty">읽지않은 메일 없음</div>';}
   });
 }
-function loadGmailFeed(){
-  if(!firebaseRef)return;
-  firebase.database().ref('commandCenter/_gmailFeed').on('value',s=>{
-    const d=s.val();
-    const el=document.getElementById('gmailUnreadList');
-    const dtEl=document.getElementById('gmailDigestDate');
-    if(!d||!d.messages||!d.messages.length){
-      el.innerHTML='<div class="feed-empty">읽지않은 메일 없음</div>';
-      if(d&&d.updatedAt){const dt=new Date(d.updatedAt);dtEl.textContent=`${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')} 업데이트`;}
-      return;
-    }
-    if(d.updatedAt){const dt=new Date(d.updatedAt);dtEl.textContent=`${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')} 업데이트`;}
-    el.innerHTML=d.messages.map(m=>{
-      const acctColor=m.account==='jyh150701'?'var(--accent)':m.account==='jyh230901'?'var(--accent2)':'var(--accent5)';
-      return `<a href="${m.url||'https://mail.google.com'}" target="_blank" class="feed-item" style="border-left:2px solid ${acctColor}"><div style="flex:1"><div class="feed-item-text">${escHtml(m.subject||'(제목없음)')}</div><div class="feed-item-meta">${m.from||''} · ${m.account||''} · ${m.date||''}</div></div></a>`;
-    }).join('');
-  });
-}
-
 // ===== GOOGLE CALENDAR API -> TIME BLOCK =====
 const GCAL_SOURCES=[
   {id:'jyh230901@gmail.com',key:'AIzaSyDY2_dXSoIQb5K6DHf2VsH8JGCRX3zDVCQ'},
@@ -1639,186 +1530,6 @@ function saveQuickCapture(){
   closeQuickCapture();showToast('Quick Capture 저장됨');
 }
 
-// ===== FEATURE 5: OKR =====
-function initOkrMonth(){
-  const now=new Date();currentOkrMonth=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-  const sel=document.getElementById('okrMonthSelect');
-  let h='';
-  for(let y=now.getFullYear()-1;y<=now.getFullYear()+1;y++){
-    for(let m=1;m<=12;m++){
-      const val=`${y}-${String(m).padStart(2,'0')}`;
-      h+=`<option value="${val}" ${val===currentOkrMonth?'selected':''}>${y}년 ${m}월</option>`;
-    }
-  }
-  sel.innerHTML=h;
-  loadOkrData();
-}
-function changeOkrMonth(dir){
-  const sel=document.getElementById('okrMonthSelect');
-  const idx=sel.selectedIndex+dir;
-  if(idx>=0&&idx<sel.options.length){sel.selectedIndex=idx;loadOkrMonth(sel.value);}
-}
-function loadOkrMonth(val){currentOkrMonth=val;renderOkrPage();}
-function loadOkrData(){
-  if(!firebaseRef){
-    try{okrData=JSON.parse(localStorage.getItem('dcc-okr'))||{};}catch(e){okrData={};}
-    renderOkrPage();return;
-  }
-  firebase.database().ref('commandCenter/_okr').on('value',s=>{
-    okrData=s.val()||{};localStorage.setItem('dcc-okr',JSON.stringify(okrData));
-    if(currentPage==='okr')renderOkrPage();
-  });
-}
-function saveOkrData(){
-  localStorage.setItem('dcc-okr',JSON.stringify(okrData));
-  if(firebaseRef)firebase.database().ref('commandCenter/_okr').set(okrData);
-}
-function renderOkrPage(){
-  const el=document.getElementById('okrList');
-  const monthData=okrData[currentOkrMonth]||[];
-  if(!monthData.length){el.innerHTML='<div style="padding:40px;text-align:center;color:var(--text-dim)"><div style="font-size:40px;margin-bottom:12px">&#127919;</div><div style="font-size:14px">이번 달 OKR이 없습니다.</div><div style="font-size:12px;margin-top:6px">"+ Objective" 버튼으로 추가하세요.</div></div>';return;}
-  el.innerHTML=monthData.map((obj,i)=>{
-    const krs=obj.keyResults||[];
-    const avgPct=krs.length?Math.round(krs.reduce((s,kr)=>s+(kr.progress||0),0)/krs.length):0;
-    const pctColor=avgPct>=80?'var(--success)':avgPct>=40?'var(--accent3)':'var(--danger)';
-    let h=`<div class="okr-obj-card">
-      <div class="okr-obj-title"><span>${escHtml(obj.title||'Untitled')}</span>
-        <div style="display:flex;gap:4px">
-          <button class="card-add" onclick="editOkrObjective(${i})" title="Edit">&#9998;</button>
-          <button class="card-add" onclick="deleteOkrObjective(${i})" title="Delete" style="color:var(--danger)">✕</button>
-        </div>
-      </div>`;
-    krs.forEach((kr,j)=>{
-      const kColor=kr.progress>=80?'var(--success)':kr.progress>=40?'var(--accent3)':'var(--danger)';
-      h+=`<div class="okr-kr">
-        <span style="font-size:10px;color:var(--text-dim);flex-shrink:0">KR${j+1}</span>
-        <div class="okr-kr-text">${escHtml(kr.title||'')}</div>
-        <div class="okr-kr-bar-wrap"><div class="okr-kr-bar" style="width:${kr.progress||0}%;background:${kColor}"></div></div>
-        <input type="range" min="0" max="100" value="${kr.progress||0}" style="width:60px;accent-color:var(--accent)" oninput="updateKrProgress(${i},${j},this.value)">
-        <div class="okr-kr-pct" style="color:${kColor}">${kr.progress||0}%</div>
-      </div>`;
-    });
-    h+=`<div class="okr-obj-progress">
-      <span style="font-size:11px;color:var(--text-dim)">Overall</span>
-      <div class="okr-obj-bar-wrap"><div class="okr-obj-bar" style="width:${avgPct}%"></div></div>
-      <div class="okr-obj-pct" style="color:${pctColor}">${avgPct}%</div>
-    </div></div>`;
-    return h;
-  }).join('');
-}
-function addOkrObjective(){editingOkrIdx=-1;document.getElementById('okrEditTitle').textContent='New Objective';document.getElementById('okrObjTitle').value='';document.getElementById('okrKrInputs').innerHTML='';addOkrKrInput();document.getElementById('okrEditOverlay').classList.add('active');}
-function editOkrObjective(idx){
-  editingOkrIdx=idx;
-  const monthData=okrData[currentOkrMonth]||[];
-  const obj=monthData[idx];if(!obj)return;
-  document.getElementById('okrEditTitle').textContent='Edit Objective';
-  document.getElementById('okrObjTitle').value=obj.title||'';
-  const krsEl=document.getElementById('okrKrInputs');krsEl.innerHTML='';
-  (obj.keyResults||[]).forEach(kr=>{addOkrKrInput(kr.title,kr.progress);});
-  if(!(obj.keyResults||[]).length)addOkrKrInput();
-  document.getElementById('okrEditOverlay').classList.add('active');
-}
-function addOkrKrInput(title,progress){
-  const wrap=document.getElementById('okrKrInputs');
-  const count=wrap.children.length;
-  if(count>=3){showToast('최대 3개 Key Result');return;}
-  const div=document.createElement('div');
-  div.style.cssText='display:flex;gap:6px;margin-bottom:6px;align-items:center';
-  div.innerHTML=`<span style="font-size:10px;color:var(--text-dim);flex-shrink:0">KR${count+1}</span><input class="okr-kr-title-input" placeholder="Key Result" value="${escHtml(title||'')}" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;font-size:12px;outline:none"><input type="number" class="okr-kr-pct-input" min="0" max="100" value="${progress||0}" style="width:55px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:12px;text-align:center;outline:none"><span style="font-size:11px;color:var(--text-dim)">%</span><button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--text-dim);cursor:pointer">✕</button>`;
-  wrap.appendChild(div);
-}
-function saveOkrObjective(){
-  const title=document.getElementById('okrObjTitle').value.trim();
-  if(!title){showToast('제목을 입력하세요');return;}
-  const krs=[];
-  document.querySelectorAll('#okrKrInputs > div').forEach(div=>{
-    const t=div.querySelector('.okr-kr-title-input').value.trim();
-    const p=parseInt(div.querySelector('.okr-kr-pct-input').value)||0;
-    if(t)krs.push({title:t,progress:Math.min(100,Math.max(0,p))});
-  });
-  if(!okrData[currentOkrMonth])okrData[currentOkrMonth]=[];
-  const obj={title,keyResults:krs};
-  if(editingOkrIdx>=0)okrData[currentOkrMonth][editingOkrIdx]=obj;
-  else okrData[currentOkrMonth].push(obj);
-  saveOkrData();closeOkrEdit();renderOkrPage();showToast('OKR 저장됨');
-}
-function deleteOkrObjective(idx){
-  if(!confirm('삭제하시겠습니까?'))return;
-  if(!okrData[currentOkrMonth])return;
-  okrData[currentOkrMonth].splice(idx,1);
-  saveOkrData();renderOkrPage();showToast('삭제됨');
-}
-function updateKrProgress(objIdx,krIdx,val){
-  if(!okrData[currentOkrMonth]||!okrData[currentOkrMonth][objIdx])return;
-  okrData[currentOkrMonth][objIdx].keyResults[krIdx].progress=parseInt(val);
-  saveOkrData();renderOkrPage();
-}
-function closeOkrEdit(){document.getElementById('okrEditOverlay').classList.remove('active');}
-
-// ===== FEATURE 6: DECISION LOG =====
-function loadDecisions(){
-  if(!firebaseRef){
-    try{decisionsData=JSON.parse(localStorage.getItem('dcc-decisions'))||[];}catch(e){decisionsData=[];}
-    renderDecisions();return;
-  }
-  firebase.database().ref('commandCenter/_decisions').on('value',s=>{
-    decisionsData=s.val()||[];
-    localStorage.setItem('dcc-decisions',JSON.stringify(decisionsData));
-    if(currentRightTab==='decisions')renderDecisions();
-  });
-}
-function saveDecisionsData(){
-  localStorage.setItem('dcc-decisions',JSON.stringify(decisionsData));
-  if(firebaseRef)firebase.database().ref('commandCenter/_decisions').set(decisionsData);
-}
-function toggleDecisionForm(){const f=document.getElementById('decisionForm');f.style.display=f.style.display==='none'?'flex':'none';editingDecisionId=null;document.getElementById('decTitle').value='';document.getElementById('decContext').value='';document.getElementById('decCategory').value='투자';}
-function saveDecision(){
-  const title=document.getElementById('decTitle').value.trim();
-  if(!title){showToast('제목을 입력하세요');return;}
-  const context=document.getElementById('decContext').value.trim();
-  const category=document.getElementById('decCategory').value;
-  const entry={id:editingDecisionId||Date.now(),date:dateKey(new Date()),title,context,category};
-  if(editingDecisionId){const idx=decisionsData.findIndex(d=>d.id===editingDecisionId);if(idx>=0)decisionsData[idx]=entry;}
-  else decisionsData.unshift(entry);
-  saveDecisionsData();toggleDecisionForm();renderDecisions();showToast('Decision 저장됨');
-}
-function editDecision(id){
-  const d=decisionsData.find(x=>x.id===id);if(!d)return;
-  editingDecisionId=id;
-  document.getElementById('decisionForm').style.display='flex';
-  document.getElementById('decTitle').value=d.title;
-  document.getElementById('decContext').value=d.context||'';
-  document.getElementById('decCategory').value=d.category||'기타';
-}
-function deleteDecision(id){
-  if(!confirm('삭제하시겠습니까?'))return;
-  decisionsData=decisionsData.filter(d=>d.id!==id);
-  saveDecisionsData();renderDecisions();showToast('삭제됨');
-}
-function renderDecisions(){
-  const el=document.getElementById('decisionList');
-  const sorted=[...decisionsData].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  if(!sorted.length){el.innerHTML='<div class="feed-empty" style="padding:40px">등록된 결정 없음</div>';return;}
-  const catColors={'투자':'var(--accent)','인사':'var(--accent2)','전략':'var(--accent5)','운영':'var(--accent3)','기타':'var(--text-dim)'};
-  el.innerHTML=sorted.map(d=>{
-    const cc=catColors[d.category]||'var(--text-dim)';
-    return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:var(--sh-sm);border-left:3px solid ${cc}">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px">
-        <div style="font-size:15px;font-weight:700;flex:1">${escHtml(d.title)}</div>
-        <span style="font-size:10px;padding:2px 10px;border-radius:10px;background:${cc}22;color:${cc};font-weight:600;white-space:nowrap">${d.category||'기타'}</span>
-      </div>
-      ${d.context?`<div style="font-size:12px;color:var(--text);background:var(--surface2);padding:10px 12px;border-radius:8px;margin-bottom:10px;line-height:1.6">${escHtml(d.context)}</div>`:''}
-      <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text-dim)">
-        <span>📅 ${d.date||'-'}</span>
-        <div style="display:flex;gap:10px">
-          <span style="cursor:pointer;color:var(--accent)" onclick="editDecision(${d.id})">편집</span>
-          <span style="cursor:pointer;color:var(--danger)" onclick="deleteDecision(${d.id})">삭제</span>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
 // ===== FEATURE 7: KEY CONTACTS =====
 function loadContacts(){
   if(!firebaseRef){
@@ -1981,14 +1692,8 @@ init();
     <button class="bnav-item" data-page="weekly" onclick="switchPage('weekly')">
       <span class="bnav-icon">&#128202;</span>주간
     </button>
-    <button class="bnav-item" data-page="okr" onclick="switchPage('okr')">
-      <span class="bnav-icon">&#127919;</span>OKR
-    </button>
     <button class="bnav-item" data-page="contacts" onclick="switchPage('contacts')">
       <span class="bnav-icon">&#128100;</span>연락처
-    </button>
-    <button class="bnav-item" data-page="decisions" onclick="switchPage('decisions')">
-      <span class="bnav-icon">&#9878;&#65039;</span>의사결정
     </button>
     <button class="bnav-item" data-page="captable" onclick="switchPage('captable')">
       <span class="bnav-icon">&#128176;</span>Cap
