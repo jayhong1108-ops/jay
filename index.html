@@ -1257,19 +1257,11 @@ function mergeNewFromPrevDay(key,dayData){
   const lsDismissed=JSON.parse(localStorage.getItem('dcc-dismissed-'+key)||'[]');
   const fbDismissed=dayData._dismissed||[];
   const dismissed=new Set([...lsDismissed,...fbDismissed]);
-  // Build set of task texts completed on ANY previous day (to prevent re-carry)
-  const completedOnAnyDay=new Set();
-  dates.slice(0,14).forEach(dk=>{
-    const dd=data[dk];if(!dd||!dd.tasks)return;
-    ['business','personal','progress'].forEach(s=>{
-      (dd.tasks[s]||[]).forEach(t=>{if(t.done&&t.text)completedOnAnyDay.add(t.text);});
-    });
-  });
   let changed=false;
   ['business','personal','progress'].forEach(s=>{
     const currentTexts=new Set((dayData.tasks&&dayData.tasks[s]||[]).map(t=>t.text));
     (pd.tasks[s]||[]).forEach(t=>{
-      if(!t.done&&t.text&&t.text.trim()&&!currentTexts.has(t.text)&&!dismissed.has(t.text)&&!completedOnAnyDay.has(t.text)){
+      if(!t.done&&t.text&&t.text.trim()&&!currentTexts.has(t.text)&&!dismissed.has(t.text)){
         if(!dayData.tasks)dayData.tasks={};if(!dayData.tasks[s])dayData.tasks[s]=[];
         const nt={text:t.text,done:false,priority:t.priority||'mid',carried:true,carriedFrom:prevKey.slice(5)};
         dayData.tasks[s].push(nt);
@@ -1298,9 +1290,9 @@ function mergeNewFromPrevDay(key,dayData){
 function revalidateCarryOver(){
   const key=dateKey();const td=data[key];if(!td||!td.tasks)return;
   let changed=false;
-  // Check ALL previous days (up to 14) for completed tasks — not just carriedFrom source
+  // Previous days sorted newest first
   const prevDays=Object.keys(data).filter(k=>!k.startsWith('_')&&k<key).sort().reverse().slice(0,14);
-  // Also check dismissed list
+  // Dismissed list
   const lsDismissed=JSON.parse(localStorage.getItem('dcc-dismissed-'+key)||'[]');
   const fbDismissed=td._dismissed||[];
   const dismissed=new Set([...lsDismissed,...fbDismissed]);
@@ -1308,14 +1300,19 @@ function revalidateCarryOver(){
     if(!td.tasks[s])return;
     td.tasks[s]=td.tasks[s].filter(t=>{
       if(!t.carried||t.done)return true;
-      // Remove if dismissed
       if(t.text&&dismissed.has(t.text)){changed=true;return false;}
-      // Remove if completed on ANY previous day
+      // Check MOST RECENT occurrence of this task on previous days
+      // If the most recent day that has this task shows it as done → remove
+      // If the most recent day shows it as not done → keep
       for(const dk of prevDays){
         const pd=data[dk];
         if(pd&&pd.tasks&&pd.tasks[s]){
-          const match=pd.tasks[s].find(st=>st.text===t.text&&st.done);
-          if(match){changed=true;return false;}
+          const match=pd.tasks[s].find(st=>st.text===t.text);
+          if(match){
+            // Found most recent occurrence
+            if(match.done){changed=true;return false;} // completed → remove
+            else{return true;} // still uncompleted → keep
+          }
         }
       }
       return true;
@@ -1327,8 +1324,11 @@ function revalidateCarryOver(){
       for(const dk of prevDays){
         const pd=data[dk];
         if(pd&&pd.directives){
-          const match=pd.directives.find(sd=>sd.text===d.text&&sd.status==='done');
-          if(match){changed=true;return false;}
+          const match=pd.directives.find(sd=>sd.text===d.text);
+          if(match){
+            if(match.status==='done'){changed=true;return false;}
+            else{return true;}
+          }
         }
       }
     }return true;
@@ -1347,14 +1347,7 @@ function getCarryOverTasks(){const key=dateKey();
   const fbDismissed=(data[key]&&data[key]._dismissed)||[];
   const dismissed=new Set([...lsDismissed,...fbDismissed]);
   const dates=Object.keys(data).filter(k=>!k.startsWith('_')).sort().reverse();let prev=null;for(const dk of dates){if(dk<key){prev=dk;break;}}if(!prev)return null;const pd=data[prev];
-  // Build set of tasks completed on ANY previous day
-  const completedOnAnyDay=new Set();
-  dates.filter(dk=>dk<key).slice(0,14).forEach(dk=>{
-    const dd=data[dk];if(!dd)return;
-    if(dd.tasks){['business','personal','progress'].forEach(s=>{(dd.tasks[s]||[]).forEach(t=>{if(t.done&&t.text)completedOnAnyDay.add(t.text);});});}
-    if(dd.directives){dd.directives.forEach(d=>{if(d.status==='done'&&d.text)completedOnAnyDay.add(d.text);});}
-  });
-  const carry={tasks:{},directives:[]};let has=false;if(pd.tasks){['business','personal','progress'].forEach(s=>{carry.tasks[s]=[];(pd.tasks[s]||[]).forEach(t=>{if(!t.done&&t.text&&t.text.trim()&&!dismissed.has(t.text)&&!completedOnAnyDay.has(t.text)){carry.tasks[s].push({...t,carried:true,carriedFrom:prev.slice(5)});has=true;}});});}if(pd.directives){pd.directives.forEach(d=>{if(d.status!=='done'&&d.text&&d.text.trim()&&!dismissed.has(d.text)&&!completedOnAnyDay.has(d.text)){carry.directives.push({...d,carried:true});has=true;}});}return has?carry:null;}
+  const carry={tasks:{},directives:[]};let has=false;if(pd.tasks){['business','personal','progress'].forEach(s=>{carry.tasks[s]=[];(pd.tasks[s]||[]).forEach(t=>{if(!t.done&&t.text&&t.text.trim()&&!dismissed.has(t.text)){carry.tasks[s].push({...t,carried:true,carriedFrom:prev.slice(5)});has=true;}});});}if(pd.directives){pd.directives.forEach(d=>{if(d.status!=='done'&&d.text&&d.text.trim()&&!dismissed.has(d.text)){carry.directives.push({...d,carried:true});has=true;}});}return has?carry:null;}
 
 // ===== DATA =====
 function loadLocalData(){try{data=JSON.parse(localStorage.getItem(LOCAL_KEY))||{};}catch(e){data={};}}
