@@ -1406,7 +1406,7 @@ function saveDayData(){
   ['business','personal','progress'].forEach(s=>{dd.tasks[s]=[];document.getElementById(s+'List').querySelectorAll('.task-item').forEach(item=>{const text=item.querySelector('.task-text').value;if(text.trim()||document.activeElement===item.querySelector('.task-text')){const pEl=item.querySelector('.task-priority'),p=pEl.classList.contains('priority-high')?'high':pEl.classList.contains('priority-mid')?'mid':'low';dd.tasks[s].push({text,done:item.querySelector('.task-check').classList.contains('checked'),priority:p,carried:item.classList.contains('carried-over'),carriedFrom:item.querySelector('.carry-tag')?.textContent.replace('↻','')||'',recurring:item.classList.contains('recurring')});}});});
   document.querySelectorAll('.time-content').forEach(el=>{const c=el.textContent.trim();if(c&&!el.dataset.gcal)dd.schedule[el.dataset.time]=c;});
   document.getElementById('directiveList').querySelectorAll('.directive-item').forEach(item=>{const text=item.querySelector('.directive-text').value;if(text.trim()||document.activeElement===item.querySelector('.directive-text')){const sEl=item.querySelector('.directive-status'),st=sEl.classList.contains('status-done')?'done':sEl.classList.contains('status-waiting')?'waiting':'pending';const dueEl=item.querySelector('.directive-due');dd.directives.push({text,assignee:item.querySelector('input[type="text"]').value,status:st,carried:item.classList.contains('carried-over'),dueDate:dueEl?dueEl.value:''});}});
-  dd.memo=document.getElementById('memoArea').value;dd.lastModified=new Date().toISOString();data[key]=dd;saveLocalData();
+  dd.memo=document.getElementById('memoArea').value;dd.lastModified=new Date().toISOString();dd._merged=true;data[key]=dd;saveLocalData();
   if(firebaseRef){_lastPushedKey=key;firebaseRef.child(key).set(dd);}
 }
 function loadDayData(){
@@ -1429,13 +1429,13 @@ function loadDayData(){
   if(!dayData&&carry){
     ['business','personal','progress'].forEach(s=>{const l=document.getElementById(s+'List');(carry.tasks[s]||[]).forEach(t=>l.appendChild(createTaskItem(s,t)));});
     const dL=document.getElementById('directiveList');carry.directives.forEach(d=>dL.appendChild(createDirectiveItem(d)));
-    document.getElementById('memoArea').value='';showToast(`미완료 ${document.querySelectorAll('.carried-over').length}건 이월`);setTimeout(()=>saveDayData(),100);
+    document.getElementById('memoArea').value='';showToast(`미완료 ${document.querySelectorAll('.carried-over').length}건 이월`);setTimeout(()=>{saveDayData();},100);
   }else if(dayData){
     if(dayData.tasks){['business','personal','progress'].forEach(s=>{const l=document.getElementById(s+'List');(dayData.tasks[s]||[]).forEach(t=>l.appendChild(createTaskItem(s,t)));});}
     if(dayData.schedule){Object.entries(dayData.schedule).forEach(([time,content])=>{if(content.startsWith('📅'))return;const el=document.querySelector(`.time-content[data-time="${time}"]`);if(el){el.textContent=content;el.classList.add('has-content');}});}
     if(dayData.directives){const l=document.getElementById('directiveList');dayData.directives.forEach(d=>l.appendChild(createDirectiveItem(d)));}
     document.getElementById('memoArea').value=dayData.memo||'';
-    mergeNewFromPrevDay(key,dayData);
+    if(!dayData._merged){mergeNewFromPrevDay(key,dayData);dayData._merged=true;data[key]=dayData;saveLocalData();}
   }else{document.getElementById('memoArea').value='';}
   revalidateCarryOver();
   document.getElementById('memoCharCount').textContent=document.getElementById('memoArea').value.length+'자';updateCounts();updateCurrentTimeIndicator();applyRecurringTasks();
