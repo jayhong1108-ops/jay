@@ -1257,14 +1257,17 @@ function mergeNewFromPrevDay(key,dayData){
   const lsDismissed=JSON.parse(localStorage.getItem('dcc-dismissed-'+key)||'[]');
   const fbDismissed=dayData._dismissed||[];
   const dismissed=new Set([...lsDismissed,...fbDismissed]);
+  // Collect ALL task texts across ALL sections of today (to prevent cross-section duplicates)
+  const allCurrentTexts=new Set();
+  if(dayData.tasks){['business','personal','progress'].forEach(s=>{(dayData.tasks[s]||[]).forEach(t=>{if(t.text)allCurrentTexts.add(t.text);});});}
   let changed=false;
   ['business','personal','progress'].forEach(s=>{
-    const currentTexts=new Set((dayData.tasks&&dayData.tasks[s]||[]).map(t=>t.text));
     (pd.tasks[s]||[]).forEach(t=>{
-      if(!t.done&&t.text&&t.text.trim()&&!currentTexts.has(t.text)&&!dismissed.has(t.text)){
+      if(!t.done&&t.text&&t.text.trim()&&!allCurrentTexts.has(t.text)&&!dismissed.has(t.text)){
         if(!dayData.tasks)dayData.tasks={};if(!dayData.tasks[s])dayData.tasks[s]=[];
         const nt={text:t.text,done:false,priority:t.priority||'mid',carried:true,carriedFrom:prevKey.slice(5)};
         dayData.tasks[s].push(nt);
+        allCurrentTexts.add(t.text); // prevent duplicate if same text in multiple sections
         document.getElementById(s+'List').appendChild(createTaskItem(s,nt));
         changed=true;
       }
@@ -1292,26 +1295,37 @@ function revalidateCarryOver(){
   let changed=false;
   // Previous days sorted newest first
   const prevDays=Object.keys(data).filter(k=>!k.startsWith('_')&&k<key).sort().reverse().slice(0,14);
+  const immediatePrev=prevDays[0]||null;
+  const immediatePrevData=immediatePrev?data[immediatePrev]:null;
   // Dismissed list
   const lsDismissed=JSON.parse(localStorage.getItem('dcc-dismissed-'+key)||'[]');
   const fbDismissed=td._dismissed||[];
   const dismissed=new Set([...lsDismissed,...fbDismissed]);
+  // Build set of ALL task texts on the immediate previous day (any section, any status)
+  const prevDayAllTexts=new Set();
+  if(immediatePrevData&&immediatePrevData.tasks){
+    ['business','personal','progress'].forEach(s=>{
+      (immediatePrevData.tasks[s]||[]).forEach(t=>{if(t.text)prevDayAllTexts.add(t.text);});
+    });
+  }
   ['business','personal','progress'].forEach(s=>{
     if(!td.tasks[s])return;
     td.tasks[s]=td.tasks[s].filter(t=>{
       if(!t.carried||t.done)return true;
       if(t.text&&dismissed.has(t.text)){changed=true;return false;}
-      // Check MOST RECENT occurrence of this task on previous days
-      // If the most recent day that has this task shows it as done → remove
-      // If the most recent day shows it as not done → keep
+      // If carried task doesn't exist on the immediate previous day at all → it was deleted → remove
+      if(immediatePrevData&&!prevDayAllTexts.has(t.text)){changed=true;return false;}
+      // Check MOST RECENT occurrence across previous days
       for(const dk of prevDays){
         const pd=data[dk];
-        if(pd&&pd.tasks&&pd.tasks[s]){
-          const match=pd.tasks[s].find(st=>st.text===t.text);
-          if(match){
-            // Found most recent occurrence
-            if(match.done){changed=true;return false;} // completed → remove
-            else{return true;} // still uncompleted → keep
+        if(pd&&pd.tasks){
+          // Check ALL sections (task might have moved between sections)
+          for(const ss of ['business','personal','progress']){
+            const match=(pd.tasks[ss]||[]).find(st=>st.text===t.text);
+            if(match){
+              if(match.done){changed=true;return false;} // completed → remove
+              else{return true;} // still uncompleted → keep
+            }
           }
         }
       }
@@ -1321,6 +1335,10 @@ function revalidateCarryOver(){
   if(td.directives){td.directives=td.directives.filter(d=>{
     if(d.carried&&d.status!=='done'){
       if(d.text&&dismissed.has(d.text)){changed=true;return false;}
+      // Check if directive exists on immediate previous day
+      const prevHasDir=immediatePrevData&&immediatePrevData.directives&&
+        immediatePrevData.directives.some(pd=>pd.text===d.text);
+      if(immediatePrevData&&!prevHasDir){changed=true;return false;}
       for(const dk of prevDays){
         const pd=data[dk];
         if(pd&&pd.directives){
@@ -1385,7 +1403,8 @@ function loadDayData(){
     if(dayData.schedule){Object.entries(dayData.schedule).forEach(([time,content])=>{if(content.startsWith('📅'))return;const el=document.querySelector(`.time-content[data-time="${time}"]`);if(el){el.textContent=content;el.classList.add('has-content');}});}
     if(dayData.directives){const l=document.getElementById('directiveList');dayData.directives.forEach(d=>l.appendChild(createDirectiveItem(d)));}
     document.getElementById('memoArea').value=dayData.memo||'';
-    if(!dayData._merged){mergeNewFromPrevDay(key,dayData);dayData._merged=true;data[key]=dayData;saveLocalData();}
+    // Always run merge (no _merged gate) — dismissed + currentTexts prevent duplicates
+    mergeNewFromPrevDay(key,dayData);
   }else{document.getElementById('memoArea').value='';}
   revalidateCarryOver();
   document.getElementById('memoCharCount').textContent=document.getElementById('memoArea').value.length+'자';updateCounts();updateCurrentTimeIndicator();applyRecurringTasks();
