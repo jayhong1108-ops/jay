@@ -393,6 +393,7 @@
     <div class="brand">&#9632; Jay's CEO Dashboard</div>
     <div class="top-tabs">
       <button class="top-tab active" data-page="dashboard" onclick="switchPage('dashboard')">Daily Task</button>
+      <button class="top-tab" data-page="mgmt" onclick="switchPage('mgmt')">업무관리</button>
       <button class="top-tab" data-page="daily" onclick="switchPage('daily')">일일업무보고</button>
       <button class="top-tab" data-page="weekly" onclick="switchPage('weekly')">주간업무보고</button>
       <button class="top-tab" data-page="contacts" onclick="switchPage('contacts')">Contacts</button>
@@ -514,6 +515,11 @@
   <div class="week-view" id="weekView"></div>
   <div class="review-panel" id="reviewPanel"></div>
   <div class="month-view" id="monthView"></div>
+</div>
+
+<!-- ===== PAGE: 업무관리 ===== -->
+<div class="page" id="page-mgmt">
+  <div class="iframe-page"><iframe id="mgmtIframe" src="https://jun2857.github.io/mgmt-v2" allow="clipboard-read; clipboard-write"></iframe></div>
 </div>
 
 <!-- ===== PAGE: 일일업무보고 ===== -->
@@ -1685,6 +1691,9 @@ init();
   <div class="bottom-nav-inner">
     <button class="bnav-item active" data-page="dashboard" onclick="switchPage('dashboard')">
       <span class="bnav-icon">&#128203;</span>Tasks
+    </button>
+    <button class="bnav-item" data-page="mgmt" onclick="switchPage('mgmt')">
+      <span class="bnav-icon">&#128188;</span>업무
     </button>
     <button class="bnav-item" data-page="daily" onclick="switchPage('daily')">
       <span class="bnav-icon">&#128196;</span>일일
