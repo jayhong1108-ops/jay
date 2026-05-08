@@ -102,7 +102,7 @@
   .trend-toggle:hover{color:var(--text);background:var(--border)}
 
   /* === DAY VIEW === */
-  .main{display:grid;grid-template-columns:230px 1fr 280px;gap:0;flex:1;overflow:hidden;min-height:0}
+  .main{display:grid;grid-template-columns:230px 1fr 300px;gap:0;flex:1;overflow:hidden;min-height:0}
   .main.hidden{display:none}
   .schedule-col{grid-row:1/-1;border-right:1px solid var(--border);overflow-y:auto;background:var(--surface);min-height:0}
   .col-header{padding:12px 14px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-dim);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:5}
@@ -156,21 +156,6 @@
 
   /* RIGHT COLUMN - TABBED */
   .right-col{grid-row:1/-1;border-left:1px solid var(--border);display:flex;flex-direction:column;background:var(--surface);min-height:0}
-  .right-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:5;background:var(--surface)}
-  .right-tab{flex:1;padding:10px 4px;font-size:11px;font-weight:700;text-align:center;cursor:pointer;border:none;background:transparent;color:var(--text-dim);transition:all .15s;text-transform:uppercase;letter-spacing:.5px;-webkit-tap-highlight-color:transparent}
-  .right-tab:hover{color:var(--text);background:var(--surface2)}
-  .right-tab.active{color:var(--accent);border-bottom:2px solid var(--accent)}
-  .right-panel{display:none;flex:1;overflow-y:auto;flex-direction:column}
-  .right-panel.active{display:flex}
-  .memo-body{flex:1;padding:10px}
-  .memo-textarea{width:100%;height:100%;min-height:200px;background:transparent;border:none;color:var(--text);font-family:inherit;font-size:13px;line-height:1.7;resize:none;outline:none}
-  .memo-textarea::placeholder{color:var(--text-dim)}
-
-  /* CALENDAR PANEL */
-  .cal-iframe-wrap{flex:1;position:relative;overflow:hidden}
-  .cal-iframe-wrap iframe{width:100%;height:100%;border:none;min-height:400px}
-  .cal-setup-msg{padding:20px;text-align:center;color:var(--text-dim);font-size:12px;line-height:1.8}
-  .cal-setup-msg a{color:var(--accent);text-decoration:none}
 
   /* FEED PANEL */
   .feed-section{padding:12px;border-bottom:1px solid var(--border)}
@@ -334,7 +319,6 @@
     .center-area{grid-row:auto;min-height:400px;overflow:visible}
     .task-grid{grid-template-columns:1fr 1fr}
     .right-col{border-left:none;border-top:1px solid var(--border);grid-row:auto;min-height:300px;overflow:visible}
-    .right-panel.active{min-height:250px}
     .week-grid{grid-template-columns:repeat(3,1fr)}
     .card-body{min-height:80px}
   }
@@ -366,8 +350,6 @@
     .date-display{min-width:120px;font-size:12px}
     .btn{padding:5px 10px;font-size:11px}
     .notif-dropdown{width:280px;right:-40px}
-    .right-tabs{flex-wrap:wrap;gap:0}
-    .right-tab{padding:8px 4px;font-size:10px;letter-spacing:0}
     .trend-chart{height:70px}
     .trend-bar-label{font-size:7px}
     .review-stat-grid{grid-template-columns:repeat(2,1fr)}
@@ -397,7 +379,7 @@
       <button class="top-tab" data-page="mgmt" onclick="switchPage('mgmt')">업무관리</button>
       <button class="top-tab" data-page="daily" onclick="switchPage('daily')">일일업무보고</button>
       <button class="top-tab" data-page="weekly" onclick="switchPage('weekly')">주간업무보고</button>
-      <button class="top-tab" data-page="contacts" onclick="switchPage('contacts')">Contacts</button>
+
       <button class="top-tab" data-page="captable" onclick="switchPage('captable')">Cap Table</button>
     </div>
   </div>
@@ -461,56 +443,30 @@
     </div>
     <!-- RIGHT COLUMN: TABBED -->
     <div class="right-col">
-      <div class="right-tabs">
-        <button class="right-tab" data-rtab="memo" onclick="switchRightTab('memo')">Memo</button>
-        <button class="right-tab" data-rtab="calendar" onclick="switchRightTab('calendar')">Calendar</button>
-        <button class="right-tab" data-rtab="feed" onclick="switchRightTab('feed')">Feed</button>
-        <button class="right-tab active" data-rtab="slack" onclick="switchRightTab('slack')">Slack</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border);background:var(--surface)">
+        <span style="font-size:12px;font-weight:700;letter-spacing:.3px">&#128100; Contacts</span>
+        <button class="btn" style="background:var(--accent);color:#fff;border-color:var(--accent);padding:3px 10px;font-size:10px" onclick="toggleContactForm()">+ 추가</button>
       </div>
-      <div class="right-panel" id="panelMemo">
-        <div style="padding:6px 14px;font-size:10px;color:var(--text-dim);text-align:right;border-bottom:1px solid var(--border)" id="memoCharCount">0자</div>
-        <div class="memo-body"><textarea class="memo-textarea" id="memoArea" placeholder="메모, 아이디어, 회의록..." oninput="onMemoInput()"></textarea></div>
+      <div style="padding:8px 10px;border-bottom:1px solid var(--border)">
+        <input class="rp-search" id="contactSearch" placeholder="이름, 조직 검색..." oninput="renderContacts()" style="width:100%;padding:6px 10px;font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text)">
       </div>
-      <div class="right-panel" id="panelCalendar">
-        <div class="cal-iframe-wrap" id="calWrap">
-          <div class="cal-setup-msg" id="calSetupMsg">
-            Google Calendar를 연동하려면<br>&#9881;&#65039; 설정에서 캘린더 이메일을 입력하세요.<br><br>
-            <span style="font-size:11px;color:var(--text-dim)">설정 -> Google Calendar -> 이메일 입력</span>
-          </div>
+      <div id="contactForm" class="rp-inline-form" style="display:none;padding:10px 12px;border-bottom:1px solid var(--border);flex-direction:column;gap:6px">
+        <input id="ctName" placeholder="이름" style="width:100%;padding:6px 8px;font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text)">
+        <input id="ctOrg" placeholder="조직" style="width:100%;padding:6px 8px;font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text)">
+        <div style="display:flex;gap:6px"><input id="ctRole" placeholder="직함" style="flex:1;padding:6px 8px;font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text)"><select id="ctType" style="padding:6px 8px;font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text)"><option value="투자자">투자자</option><option value="파트너">파트너</option><option value="임원">임원</option><option value="기타">기타</option></select></div>
+        <input id="ctPhone" placeholder="전화" style="width:100%;padding:6px 8px;font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text)">
+        <input id="ctEmail" placeholder="이메일" style="width:100%;padding:6px 8px;font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text)">
+        <textarea id="ctNotes" placeholder="메모 / 다음 액션" style="width:100%;padding:6px 8px;font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);min-height:40px;resize:vertical;font-family:inherit"></textarea>
+        <div style="display:flex;gap:6px">
+          <button class="btn" style="background:var(--accent);color:#fff;border-color:var(--accent);flex:1;font-size:11px" onclick="saveContact()">저장</button>
+          <button class="btn" style="font-size:11px" onclick="toggleContactForm()">취소</button>
         </div>
       </div>
-      <div class="right-panel" id="panelFeed">
-        <div class="feed-section">
-          <div class="feed-section-title">&#127970; 다우오피스</div>
-          <div style="display:flex;gap:6px;margin-bottom:8px">
-            <a href="https://clify.daouoffice.com/gw/app/approval" target="_blank" class="feed-link-btn" style="flex:1;justify-content:center">&#128203; 전자결재</a>
-            <a href="https://clify.daouoffice.com/gw/app/mail" target="_blank" class="feed-link-btn" style="flex:1;justify-content:center">&#128231; 메일함</a>
-          </div>
-          <div style="padding:4px 0;font-size:10px;font-weight:700;color:var(--text-dim);letter-spacing:.5px">&#128203; 전자결재 대기</div>
-          <div id="daouApproval" style="padding:4px 8px;font-size:11px;color:var(--success)">&#10003; 대기 문서 없음</div>
-          <div style="padding:8px 0 4px;font-size:10px;font-weight:700;color:var(--text-dim);letter-spacing:.5px">&#128231; 읽지않은 메일</div>
-          <div id="daouMailList"><div class="feed-empty">로딩 중...</div></div>
-        </div>
-      </div>
-      <div class="right-panel active" id="panelSlack">
-        <div class="feed-section" style="padding:8px 12px;display:flex;align-items:center;justify-content:space-between">
-          <div class="feed-section-title" style="margin:0">&#128172; Slack Daily Digest</div>
-          <div style="display:flex;align-items:center;gap:6px">
-            <span id="slackDigestDate" style="font-size:9px;color:var(--text-dim)"></span>
-            <a href="https://app.slack.com/client" target="_blank" class="btn" style="padding:3px 8px;font-size:10px">Slack 열기</a>
-          </div>
-        </div>
-        <div class="feed-section">
-          <div class="feed-section-title">&#128226; 채널 업데이트</div>
-          <div id="slackChannelDigest"><div class="feed-empty">다이제스트 로딩 중...</div></div>
-        </div>
-        <div class="feed-section">
-          <div class="feed-section-title">&#128233; 받은 DM 요약</div>
-          <div id="slackDmDigest"><div class="feed-empty">DM 로딩 중...</div></div>
-        </div>
-      </div>
-      <!-- DECISIONS PANEL -->
+      <div id="contactList" style="flex:1;overflow-y:auto;padding:8px 10px;display:flex;flex-direction:column;gap:8px"></div>
     </div>
+    <!-- Hidden memo elements for data persistence -->
+    <textarea id="memoArea" style="display:none"></textarea>
+    <span id="memoCharCount" style="display:none">0자</span>
   </div>
   <div class="week-view" id="weekView"></div>
   <div class="review-panel" id="reviewPanel"></div>
@@ -556,32 +512,6 @@
   <div class="iframe-page"><iframe id="weeklyIframe" allow="clipboard-read; clipboard-write"></iframe></div>
 </div>
 
-
-<!-- ===== PAGE: CONTACTS (Full Page) ===== -->
-<div class="page" id="page-contacts">
-  <div class="page-header">
-    <div style="display:flex;align-items:center;gap:10px">
-      <span style="font-size:14px;font-weight:700">&#128100; Key Contacts</span>
-      <input class="rp-search" id="contactSearch" placeholder="이름, 조직 검색..." oninput="renderContacts()" style="width:220px">
-    </div>
-    <div class="page-actions">
-      <button class="btn" style="background:var(--accent);color:#fff;border-color:var(--accent)" onclick="toggleContactForm()">+ 연락처 추가</button>
-    </div>
-  </div>
-  <div style="flex:1;overflow-y:auto;padding:16px">
-    <div id="contactForm" class="rp-inline-form" style="display:none;max-width:600px;margin:0 auto 16px">
-      <div class="rp-form-row"><input id="ctName" placeholder="이름" style="flex:1"><input id="ctOrg" placeholder="조직" style="flex:1"></div>
-      <div class="rp-form-row"><input id="ctRole" placeholder="직함" style="flex:1"><input id="ctPhone" placeholder="전화" style="flex:1"></div>
-      <div class="rp-form-row"><input id="ctEmail" placeholder="이메일" style="flex:1"><select id="ctType"><option value="투자자">투자자</option><option value="파트너">파트너</option><option value="임원">임원</option><option value="기타">기타</option></select></div>
-      <textarea id="ctNotes" placeholder="메모 / 다음 액션"></textarea>
-      <div class="rp-form-row">
-        <button class="btn" style="background:var(--accent);color:#fff;border-color:var(--accent);flex:1" onclick="saveContact()">저장</button>
-        <button class="btn" onclick="toggleContactForm()">취소</button>
-      </div>
-    </div>
-    <div id="contactList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px"></div>
-  </div>
-</div>
 
 
 <!-- ===== PAGE: CAP TABLE ===== -->
@@ -736,7 +666,7 @@
 
 <script>
 // ===== STATE =====
-let currentDate=new Date(),data={},currentView='day',currentPage='dashboard',currentRightTab='slack';
+let currentDate=new Date(),data={},currentView='day',currentPage='dashboard';
 let firebaseDb=null,firebaseRef=null,isFirebaseConnected=false,saveTimeout=null,ignoreNextFirebaseUpdate=false;
 let firebaseAuthUid=null;
 const LOCAL_KEY='daily-command-center',FB_CONFIG_KEY='dcc-firebase-config',CAL_CONFIG_KEY='dcc-calendar-config',FINANCE_SHEET_KEY='dcc-finance-sheet';
@@ -770,8 +700,8 @@ function init(){
   loadLocalData();seedInitialData();initFirebase();
   renderDateDisplay();buildTimeSlots();loadDayData();
   updateCurrentTimeIndicator();setInterval(updateCurrentTimeIndicator,60000);
-  loadCalendarEmbed();loadEmailLinks();loadDaouMail();fetchGcalEvents();
-  loadSlackDigest();applyRecurringTasks();
+  fetchGcalEvents();
+  applyRecurringTasks();
   requestNotificationPermission();
   loadFinancePage();
   loadContacts();
@@ -797,23 +727,10 @@ function switchPage(p){
   if(p==='daily')loadDaily();
   else if(p==='weekly')loadWeekly();
   else if(p==='finance')loadFinancePage();
-  else if(p==='contacts')renderContacts();
   else if(p==='decisions')renderDecisions();
 }
 
-// ===== RIGHT PANEL TABS =====
-function switchRightTab(t){
-  currentRightTab=t;
-  document.querySelectorAll('.right-tab').forEach(b=>b.classList.toggle('active',b.dataset.rtab===t));
-  document.querySelectorAll('.right-panel').forEach(p=>p.classList.remove('active'));
-  const panelId='panel'+t.charAt(0).toUpperCase()+t.slice(1);
-  const panel=document.getElementById(panelId);
-  if(panel)panel.classList.add('active');
-  if(t==='calendar')loadCalendarEmbed();
-  if(t==='feed'){loadDaouMail();}
-  if(t==='decisions')renderDecisions();
-  if(t==='contacts')renderContacts();
-}
+// ===== RIGHT PANEL =====
 
 // ===== GOOGLE CALENDAR =====
 const DEFAULT_CAL={cal1:'jyh230901@gmail.com',cal2:'jyh150701@gmail.com',cal3:''};
@@ -1694,7 +1611,7 @@ function loadContacts(){
   firebase.database().ref('commandCenter/_contacts').on('value',s=>{
     contactsData=s.val()||[];
     localStorage.setItem('dcc-contacts',JSON.stringify(contactsData));
-    if(currentRightTab==='contacts')renderContacts();
+    renderContacts();
   });
 }
 function saveContactsData(){
@@ -1742,31 +1659,28 @@ function renderContacts(){
   let filtered=contactsData;
   if(q)filtered=contactsData.filter(c=>(c.name||'').toLowerCase().includes(q)||(c.org||'').toLowerCase().includes(q)||(c.role||'').toLowerCase().includes(q));
   const sorted=[...filtered].sort((a,b)=>(b.lastContact||'').localeCompare(a.lastContact||''));
-  if(!sorted.length){el.innerHTML='<div class="feed-empty" style="grid-column:1/-1;padding:40px">등록된 연락처 없음</div>';return;}
+  if(!sorted.length){el.innerHTML='<div class="feed-empty" style="padding:30px;text-align:center">등록된 연락처 없음</div>';return;}
   const typeColors={'투자자':'var(--accent)','파트너':'var(--accent5)','임원':'var(--accent2)','기타':'var(--text-dim)'};
   el.innerHTML=sorted.map(c=>{
     const tc=typeColors[c.type]||'var(--text-dim)';
     const initials=(c.name||'?').slice(0,1);
-    return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:var(--sh-sm);border-left:3px solid ${tc}">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-        <div style="width:36px;height:36px;border-radius:50%;background:${tc};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;flex-shrink:0">${initials}</div>
+    return `<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;border-left:3px solid ${tc}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <div style="width:28px;height:28px;border-radius:50%;background:${tc};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0">${initials}</div>
         <div style="flex:1;min-width:0">
-          <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(c.name)}</div>
-          <div style="font-size:11px;color:var(--text-dim)">${escHtml(c.org||'')} ${c.role?'· '+escHtml(c.role):''}</div>
+          <div style="font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(c.name)}</div>
+          <div style="font-size:10px;color:var(--text-dim)">${escHtml(c.org||'')} ${c.role?'· '+escHtml(c.role):''}</div>
         </div>
-        <span style="font-size:10px;padding:2px 8px;border-radius:10px;background:${tc}22;color:${tc};font-weight:600">${c.type||'기타'}</span>
+        <span style="font-size:9px;padding:2px 6px;border-radius:8px;background:${tc}22;color:${tc};font-weight:600">${c.type||'기타'}</span>
       </div>
-      ${c.phone||c.email?`<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px;font-size:11px;color:var(--text-dim)">
+      ${c.phone||c.email?`<div style="display:flex;flex-direction:column;gap:2px;margin-bottom:4px;font-size:10px;color:var(--text-dim);padding-left:36px">
         ${c.phone?`<span>📞 ${escHtml(c.phone)}</span>`:''}
         ${c.email?`<span>✉ ${escHtml(c.email)}</span>`:''}
       </div>`:''}
-      ${c.notes?`<div style="font-size:11px;color:var(--text);background:var(--surface2);padding:8px 10px;border-radius:6px;margin-bottom:8px;line-height:1.5">${escHtml(c.notes)}</div>`:''}
-      <div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:var(--text-dim)">
-        <span>최근 연락: ${c.lastContact||'-'}</span>
-        <div style="display:flex;gap:8px">
-          <span style="cursor:pointer;color:var(--accent)" onclick="editContact(${c.id})">편집</span>
-          <span style="cursor:pointer;color:var(--danger)" onclick="deleteContact(${c.id})">삭제</span>
-        </div>
+      ${c.notes?`<div style="font-size:10px;color:var(--text);background:var(--surface);padding:6px 8px;border-radius:5px;margin-bottom:4px;line-height:1.4;margin-left:36px">${escHtml(c.notes)}</div>`:''}
+      <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;font-size:10px;padding-top:2px">
+        <span style="cursor:pointer;color:var(--accent)" onclick="editContact(${c.id})">편집</span>
+        <span style="cursor:pointer;color:var(--danger)" onclick="deleteContact(${c.id})">삭제</span>
       </div>
     </div>`;
   }).join('');
@@ -1850,10 +1764,7 @@ init();
     <button class="bnav-item" data-page="weekly" onclick="switchPage('weekly')">
       <span class="bnav-icon">&#128202;</span>주간
     </button>
-    <button class="bnav-item" data-page="contacts" onclick="switchPage('contacts')">
-      <span class="bnav-icon">&#128100;</span>연락처
-    </button>
-    <button class="bnav-item" data-page="captable" onclick="switchPage('captable')">
+<button class="bnav-item" data-page="captable" onclick="switchPage('captable')">
       <span class="bnav-icon">&#128176;</span>Cap
     </button>
   </div>
