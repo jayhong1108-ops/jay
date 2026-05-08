@@ -1127,7 +1127,7 @@ function initFirebase(){
             }
           }
         });
-        revalidateCarryOver();
+        cleanupAllDays();
         saveLocalData();
         if(currentView==='day'&&currentPage==='dashboard'){loadDayData();fetchGcalEvents();}
         else if(currentView==='week')renderWeekView();
@@ -1289,6 +1289,59 @@ function mergeNewFromPrevDay(key,dayData){
     if(firebaseRef){_lastPushedKey=key;firebaseRef.child(key).set(dayData);}
     showToast('전날 미완료 태스크 추가됨');
   }
+}
+function cleanupAllDays(){
+  // Run carry-over validation across ALL days in data (not just current day)
+  const allDates=Object.keys(data).filter(k=>!k.startsWith('_')).sort();
+  let anyChanged=false;
+  for(let i=1;i<allDates.length;i++){
+    const dk=allDates[i];
+    const td=data[dk];if(!td||!td.tasks)continue;
+    const prevDays=allDates.slice(0,i).reverse().slice(0,14);
+    const immPrev=prevDays[0]?data[prevDays[0]]:null;
+    // All texts on immediate previous day
+    const prevAllTexts=new Set();
+    if(immPrev&&immPrev.tasks){['business','personal','progress'].forEach(s=>{(immPrev.tasks[s]||[]).forEach(t=>{if(t.text)prevAllTexts.add(t.text);});});}
+    // Dismissed
+    const lsD=JSON.parse(localStorage.getItem('dcc-dismissed-'+dk)||'[]');
+    const fbD=td._dismissed||[];
+    const dismissed=new Set([...lsD,...fbD]);
+    let changed=false;
+    ['business','personal','progress'].forEach(s=>{
+      if(!td.tasks[s])return;
+      td.tasks[s]=td.tasks[s].filter(t=>{
+        if(!t.carried||t.done)return true;
+        if(t.text&&dismissed.has(t.text)){changed=true;return false;}
+        if(immPrev&&!prevAllTexts.has(t.text)){changed=true;return false;}
+        for(const pk of prevDays){
+          const pd=data[pk];if(!pd||!pd.tasks)continue;
+          for(const ss of ['business','personal','progress']){
+            const m=(pd.tasks[ss]||[]).find(st=>st.text===t.text);
+            if(m){return m.done?(changed=true,false):true;}
+          }
+        }
+        return true;
+      });
+    });
+    if(td.directives){td.directives=td.directives.filter(d=>{
+      if(d.carried&&d.status!=='done'){
+        if(d.text&&dismissed.has(d.text)){changed=true;return false;}
+        const prevHasDir=immPrev&&immPrev.directives&&immPrev.directives.some(pd=>pd.text===d.text);
+        if(immPrev&&!prevHasDir){changed=true;return false;}
+        for(const pk of prevDays){
+          const pd=data[pk];if(!pd||!pd.directives)continue;
+          const m=pd.directives.find(sd=>sd.text===d.text);
+          if(m){return m.status==='done'?(changed=true,false):true;}
+        }
+      }return true;
+    });}
+    if(changed){
+      td.lastModified=new Date().toISOString();data[dk]=td;
+      if(firebaseRef)firebaseRef.child(dk).set(td);
+      anyChanged=true;
+    }
+  }
+  if(anyChanged)saveLocalData();
 }
 function revalidateCarryOver(){
   const key=dateKey();const td=data[key];if(!td||!td.tasks)return;
