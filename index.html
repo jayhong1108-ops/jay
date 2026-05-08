@@ -133,7 +133,8 @@
   .task-check:hover{border-color:var(--accent)}
   .task-check.checked{background:var(--success);border-color:var(--success)}
   .task-check.checked::after{content:'✓';color:#fff;font-size:12px;font-weight:700}
-  .task-text{flex:1;font-size:13px;line-height:1.5;border:none;background:transparent;color:var(--text);outline:none;resize:none;font-family:inherit;min-height:20px}
+  .task-text{flex:1;font-size:13px;line-height:1.5;border:none;background:transparent;color:var(--text);outline:none;resize:none;font-family:inherit;min-height:20px;cursor:default}
+  .task-text:not([readonly]){cursor:text;background:var(--surface);border-radius:4px;box-shadow:inset 0 0 0 1.5px var(--accent)}
   .task-text.completed{text-decoration:line-through;color:var(--text-dim)}
   .task-delete{opacity:0;background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:15px;padding:4px;transition:all .15s;-webkit-tap-highlight-color:transparent}
   .task-item:hover .task-delete{opacity:1}
@@ -1192,7 +1193,9 @@ function updateCurrentTimeIndicator(){document.querySelectorAll('.current-time-i
 
 // ===== TASKS =====
 function addTask(s){const l=document.getElementById(s+'List'),item=createTaskItem(s,{text:'',done:false,priority:'mid',carried:false});l.appendChild(item);item.querySelector('.task-text').focus();updateCounts();}
-function createTaskItem(s,td){const div=document.createElement('div');div.className='task-item'+(td.carried?' carried-over':'')+(td.recurring?' recurring':'');let tag='';if(td.carried)tag=`<span class="carry-tag">↻${td.carriedFrom||''}</span>`;else if(td.recurring)tag='<span class="recurring-tag">반복</span>';div.innerHTML=`<div class="task-check ${td.done?'checked':''}" onclick="toggleCheck(this)"></div><span class="task-priority priority-${td.priority}" onclick="cyclePriority(this)">${td.priority==='high'?'!!!':td.priority==='mid'?'!!':'!'}</span><textarea class="task-text ${td.done?'completed':''}" rows="1" oninput="autoResize(this);debounceSave()" onblur="debounceSave()" onkeydown="handleTaskKey(event,'${s}')" placeholder="할 일 입력...">${td.text}</textarea>${tag}<button class="task-delete" onclick="deleteTask(this)">✕</button>`;setTimeout(()=>autoResize(div.querySelector('.task-text')),0);return div;}
+function createTaskItem(s,td){const div=document.createElement('div');div.className='task-item'+(td.carried?' carried-over':'')+(td.recurring?' recurring':'');let tag='';if(td.carried)tag=`<span class="carry-tag">↻${td.carriedFrom||''}</span>`;else if(td.recurring)tag='<span class="recurring-tag">반복</span>';const ro=td.text?'readonly':'';div.innerHTML=`<div class="task-check ${td.done?'checked':''}" onclick="toggleCheck(this)"></div><span class="task-priority priority-${td.priority}" onclick="cyclePriority(this)">${td.priority==='high'?'!!!':td.priority==='mid'?'!!':'!'}</span><textarea class="task-text ${td.done?'completed':''}" rows="1" ${ro} ondblclick="enableTaskEdit(this)" oninput="autoResize(this);debounceSave()" onblur="finishTaskEdit(this)" onkeydown="handleTaskKey(event,'${s}')" placeholder="할 일 입력...">${td.text}</textarea>${tag}<button class="task-delete" onclick="deleteTask(this)">✕</button>`;setTimeout(()=>autoResize(div.querySelector('.task-text')),0);return div;}
+function enableTaskEdit(el){el.removeAttribute('readonly');el.focus();el.setSelectionRange(el.value.length,el.value.length);}
+function finishTaskEdit(el){if(el.value.trim())el.setAttribute('readonly','');debounceSave();}
 function toggleCheck(el){el.classList.toggle('checked');el.parentElement.querySelector('.task-text').classList.toggle('completed');updateCounts();debounceSave();}
 function cyclePriority(el){const c=el.classList.contains('priority-high')?'high':el.classList.contains('priority-mid')?'mid':'low';const n=P_CY[(P_CY.indexOf(c)+1)%3];el.className=`task-priority priority-${n}`;el.textContent=n==='high'?'!!!':n==='mid'?'!!':'!';debounceSave();}
 function deleteTask(el){
